@@ -1,5 +1,7 @@
 # Graap and Zarzycki, GMD
 
+Now this README file is tracked on Github!
+
 To reproduce results, first create a conda environment.
 
 ```
