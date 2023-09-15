@@ -73,3 +73,17 @@ ThesisPlots
 ```
 
 On a 2022 Macbook Pro M1, running with $N=6$ took approximately 4 hours from start to finish.
+
+### Processing datacommons data
+
+```
+ZIPDIR=/storage/home/cmz5202/scratch/meteorology/graap-zarzycki-using-eurec4a-atomic-field-campaign-data-to-improve-trade-wind-regimes-in-the-community-amosphere-model-2023/
+TARGETDIR=/storage/home/cmz5202/scratch/progupwp/DATA/LargeDomainCESMoutput/
+mv -v $ZIPDIR/cesm-x001/LargeDomainCESMoutput/* $TARGETDIR
+mv -v $ZIPDIR/cesm-x101/LargeDomainCESMoutput/* $TARGETDIR
+mv -v $ZIPDIR/cesm-x201/LargeDomainCESMoutput/* $TARGETDIR
+mv -v $ZIPDIR/cesm-x202/LargeDomainCESMoutput/* $TARGETDIR
+mv -v $ZIPDIR/cesm-x203/LargeDomainCESMoutput/* $TARGETDIR
+mv -v $ZIPDIR/cesm-x204/LargeDomainCESMoutput/* $TARGETDIR
+```
+
