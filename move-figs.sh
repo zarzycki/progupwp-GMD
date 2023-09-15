@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## This script will take the output from the Python and organize the figures for the publication
+
 OUTTYPE=pdf
 
 cd /Users/cmz5202/NetCDF/METEO600SAG/ThesisPlots/
