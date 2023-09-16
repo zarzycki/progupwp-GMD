@@ -58,7 +58,7 @@ MissionNames = ['Atalante_Meteomodem', 'Atalante_Vaisala' , 'BCO_Vaisala'     , 
 
 OriginalVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta']
 ObsVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta']
-PlotVarStrings     = ['T' , 'Q', 'U', 'V', 'Hwind', 'Theta']
+PlotVarStrings     = ['T' , 'Q', 'U', 'V', 'Hwind', 'theta']
 
 # OriginalVarStrings = ['Hwind']
 # PlotVarStrings     = ['Hwind']
