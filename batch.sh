@@ -44,3 +44,4 @@ python OtherVariablePackager.py $BASEDIR x204
 python IncludedFigureGenerator.py $BASEDIR
 
 date >> timing.txt
+echo "-------" >> timing.txt
