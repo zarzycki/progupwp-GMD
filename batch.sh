@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH --nodes=1 
-#SBATCH --ntasks=8
+#SBATCH --ntasks=12
 #SBATCH --mem=100GB
 #SBATCH --time=12:00:00
 #SBATCH --partition=open
@@ -8,8 +8,8 @@
 date >> timing.txt
 
 BASEDIR=/storage/home/cmz5202/scratch/progupwp/
-N=6
-configs=("x001" "x101" "x201" "x202" "x203" "x204")
+N=10
+configs=("x001" "x101" "x201" "x202" "x203" "x204" "x301" "x302" "x303" "x304")
 
 conda activate graap
 
