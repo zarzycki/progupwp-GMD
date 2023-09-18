@@ -119,7 +119,7 @@ UPWPprofiles  = np.full([NumTotalSoundings, NumILevs], np.nan)
 
 
 
-xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
 
 # In[17]:
@@ -134,7 +134,7 @@ xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
 # # THIS BLOCK CREATES 1546 x NumLev Arrays for CAM U wind, Z height, and U'W' momentum flux for all soundings
 
 ## CMZ add if flag
-cmz_calc_cg=True
+cmz_calc_cg=False
 
 if cmz_calc_cg:
     for xstri in range(0, len(xStrs)):
@@ -242,7 +242,7 @@ xmesh, ymesh = np.meshgrid(xvals, iLevVals)
 xmesh = xmesh.transpose()
 ymesh = ymesh.transpose()
 
-xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x101']
+xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304', 'x101']
 
 for xstri in range(0, len(xStrs)):
     xStr = xStrs[xstri]
@@ -317,9 +317,9 @@ StartHourStr = '00'
 
 # list of the model runs
 # (don't use the last 3 when calculating turbulent errors since they are what the errors are relative too)
-xStrs = ['x001','x101','x201','x202','x203', 'x204']
+xStrs = ['x001','x101','x201','x202','x203', 'x204','x301','x302','x303', 'x304']
 
-ChosenXstrs = ['x001','x101','x201','x202','x203', 'x204']
+ChosenXstrs = ['x001','x101','x201','x202','x203', 'x204','x301','x302','x303', 'x304']
 
 corr_xstri = np.full(np.size(ChosenXstrs), -1)
 for chosexstri in range(0, np.size(ChosenXstrs)):
@@ -474,19 +474,21 @@ print_break()
 # USER MODIFICATION SECTION!!!
 # USER MODIFICATION SECTION!!!
 # lowest and highest altitudes you want to plot for, and index in "alts" corresponding to those altitudes
-arr_minAlt = [60,60,60,60,60,60,60,60]
-arr_maxAlt = [2500,2500,5000,5000,2500,2500,17000,17000]
-arr_titleOption = ['no','no','no','no','no','no','no','no']
-arr_legendOption = ['no','inside','no','inside','no','inside','no','inside']
-arr_ncases = 8
+arr_minAlt = [60,60,60,60,  60,60,60,60,  60,60,60,60]
+arr_maxAlt = [2500,2500,5000,5000,  2500,2500,17000,17000,  2500,2500,17000,17000]
+arr_titleOption = ['no','no','no','no',  'no','no','no','no',  'no','no','no','no']
+arr_legendOption = ['no','inside','no',  'inside','no','inside','no','inside',  'inside','no','inside','no','inside']
+arr_ncases = 12
 
 for xx in range(arr_ncases):
 
     #CMZ edit this!
     if xx <= 3:
         ChosenXstrs  = ['x001', 'x101']
-    else:
+    elif xx > 3 and xx <= 7:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+    else:
+        ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
     print("DOING LOOP "+str(xx))
 
@@ -539,14 +541,13 @@ for xx in range(arr_ncases):
 
 
     # KEEP THIS LIST AS ALL XSTRINGS
-    xStrs = ['x001','x101','x201','x202','x203', 'x204']
-
+    xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
     # colours associated with each of the model runs
     PlotxStrColours = [ [0.9,0.0,0.0],
                         [0.0,0.5,0.0], \
-                        [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5] ]
-
+                        [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
+                        [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9], [0.4,0.5,0.5] ]
 
     # store the x-limits in the plots of each variable
 
@@ -997,11 +998,11 @@ print_break()
 
 # Variables to choose from
 
-arr_minAlt = [60,60,60,60]
-arr_maxAlt = [2500,2500,2500,2500]
-arr_titleOption = ['no','no','no','no']
+arr_minAlt = [60,60,  60,60,  60,60]
+arr_maxAlt = [2500,2500,  2500,2500,  2500,2500]
+arr_titleOption = ['no','no',  'no','no',  'no','no']
 #arr_legendOption = ['no','inside','no','inside']
-arr_ncases = 4
+arr_ncases = 6
 
 for xx in range(arr_ncases):
 
@@ -1010,8 +1011,10 @@ for xx in range(arr_ncases):
     #CMZ edit this!
     if xx <= 1:
         ChosenXstrs  = ['x001', 'x101']
-    else:
+    elif xx > 1 and xx <= 3:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+    else:
+        ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
     print("DOING LOOP "+str(xx))
 
@@ -1021,10 +1024,10 @@ for xx in range(arr_ncases):
     TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2'] #, 'm\u00b2/s\u00b2', \
                          # 's', 'm\u00b2/s\u00b2',       'm']
 
-
     # colours associated with each of the model runs
     PlotxStrColours = [ [0.9,0.0,0.0], [0.0,0.5,0.0], \
-                        [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5] ]
+                        [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
+                        [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9], [0.4,0.5,0.5] ]
 
     # store the x-limits in the plots of each variable
 
@@ -1034,7 +1037,6 @@ for xx in range(arr_ncases):
 
     # BIASxmins = [-2.0,-2.0, -1.7, -1.7,-2.0]
     # BIASxmaxs = [ 2.0, 2.0,  1.7,  1.7, 2.0]
-
 
     MEANxmins = [-0.03,-0.025]
     MEANxmaxs = [ 0.09, 0.025]
@@ -1256,7 +1258,7 @@ TopAlt = 4000
 
 
 # LIST OF MODEL CONFIGURATIONS
-xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302' , 'x303', 'x304']
 
 # WHICH LEAD DAY FORECAST?
 lead = 1
@@ -1436,7 +1438,12 @@ for xstri in range(0, np.size(xStrs)):
                      'g', 'h', 'i', \
                      'j', 'k', 'l', \
                      'm', 'n', 'o', \
-                     'p', 'q', 'r'  ]
+                     'p', 'q', 'r', \
+                     's', 't', 'u', \
+                     'v', 'w', 'x', \
+                     'y', 'z', 'aa', \
+                     'bb', 'cc', 'dd', \
+                       ]
 
         if   (VarStr == 'U'):
             PlotLabelText = FigLabels[0 + xstri*3] + ')'
@@ -1517,13 +1524,14 @@ else:
     print("TimeMode needs to be 'LT' or 'UTC'")
 
 
-xStrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302' , 'x303', 'x304']
 
 
 # colours associated with each of the model runs
 PlotxStrColours = [ [0.9,0.0,0.0],
                     [0.0,0.5,0.0], \
-                    [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5] ]
+                    [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
+                    [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9], [0.4,0.5,0.5] ]
 
 
 
@@ -2013,7 +2021,7 @@ lead = 1
 
 # lists of the variables and model configurations
 OriginalVarStrings = ['ta', 'q', 'u', 'v', 'theta','Hwind']
-xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+xStrs = ['x001', 'x101', 'x201', 'x202' , 'x301', 'x302']
 
 for vari in range(0,np.size(OriginalVarStrings )):
     Var = OriginalVarStrings [vari]
@@ -2045,12 +2053,13 @@ print_break()
 lead = 1
 
 # model runs stored in the error stat files
-StoredXstrs = ['x001','x101','x201','x202','x203', 'x204']
+StoredXstrs = ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
 # model runs to include on the stoplight diagrams (AND CORRESPONDING INDEX IN ALL STORED XSTRS)
-TableXstrs =  ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+TableXstrs =  ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 # CMZ, had to change these indices
-TableXstris = [ 0, 1, 2, 3, 4, 5]
+
+TableXstris = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 # variables to include on the stoplight diagrams
 # TableVars = ['T', 'Q', 'U', 'V', 'Hwind']    # for old model level based version
@@ -2142,28 +2151,30 @@ plt.title('CAM RMSEs Between ' + str(MinAlt) + ' m and ' + str(MaxAlt) + ' m Alt
 ax.grid(color='black', linewidth=5, which='minor')
 
 # set the limits to be just around the table
-plt.xlim([-0.5, 5.5])
-plt.ylim([-0.5, 5.5])
+plt.xlim([-0.5, xDim-0.5])
+plt.ylim([-0.5, yDim-0.5])
 
 
 
 # plot lines to create a grid around each cell
 # (work around for ax.grid(which='minor') not working)
 for xi in range(0,yDim-1):
-    ax.plot([0-0.5,yDim+0.5], [xi+0.5,xi+0.5], color='black', linewidth=2)
+    ax.plot([0-0.5,xDim+0.5], [xi+0.5,xi+0.5], color='black', linewidth=2)
 
 for yi in range(0,xDim-1):
-    ax.plot([yi+0.5,yi+0.5], [0-0.5,xDim+0.5], color='black', linewidth=2)
+    ax.plot([yi+0.5,yi+0.5], [0-0.5,yDim+0.5], color='black', linewidth=2)
 
 # special thick lines seperating default run and optimised runs
 ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
 ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
+if xDim > 6:
+  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
 
 # special thick lines for the outside boarders
-ax.plot([-0.5, 5.5], [-0.5,-0.5], color='black', linewidth=5)
-ax.plot([-0.5, 5.5], [ 5.5, 5.5], color='black', linewidth=5)
-ax.plot([-0.5,-0.5], [-0.5, 5.5], color='black', linewidth=5)
-ax.plot([ 5.5, 5.5], [-0.5, 5.5], color='black', linewidth=5)
+ax.plot([-0.5, xDim-0.5], [-0.5,-0.5], color='black', linewidth=5)
+ax.plot([-0.5, xDim-0.5], [ yDim-0.5, yDim-0.5], color='black', linewidth=5)
+ax.plot([-0.5,-0.5], [-0.5, yDim-0.5], color='black', linewidth=5)
+ax.plot([ xDim-0.5, xDim-0.5], [-0.5, yDim-0.5], color='black', linewidth=5)
 
 
 # long names of these variables IN REVERSE
@@ -2189,7 +2200,10 @@ cbar.set_ticks([-0.15, 0.0, 0.15])
 cbar.set_ticklabels(['15% Decrease', 'Same', '15% Increase'])
 cbar.ax.tick_params(labelsize=13)
 
-
+if xDim > 6:
+  thisFontSize=9
+else:
+  thisFontSize=18
 
 # add numbers in each cell
 for xstri in range(np.size(TableXstrs)):
@@ -2201,9 +2215,9 @@ for xstri in range(np.size(TableXstrs)):
 
             # place a black number if the cell is a light colour
             if (localcolor >= -0.05) and (localcolor <= 0.05) :
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='black', fontsize=18)
+                text = ax.text(xstri-0.28, vari-0.08, str(number), c='black', fontsize=thisFontSize)
             else:
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='white', fontsize=18)
+                text = ax.text(xstri-0.28, vari-0.08, str(number), c='white', fontsize=thisFontSize)
                 text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
 
 # SAVE THE RMSE PLOT
@@ -2232,28 +2246,28 @@ plt.title('CAM Biases Between ' + str(MinAlt) + ' m and ' + str(MaxAlt) + ' m Al
 ax.grid(color='black', linewidth=5, which='minor')
 
 # set the limits to be just around the table
-plt.xlim([-0.5, 5.5])
-plt.ylim([-0.5, 5.5])
-
-
+plt.xlim([-0.5, xDim-0.5])
+plt.ylim([-0.5, yDim-0.5])
 
 # plot lines to create a grid around each cell
 # (work around for ax.grid(which='minor') not working)
 for xi in range(0,yDim-1):
-    ax.plot([0-0.5,yDim+0.5], [xi+0.5,xi+0.5], color='black', linewidth=2)
+    ax.plot([0-0.5,xDim+0.5], [xi+0.5,xi+0.5], color='black', linewidth=2)
 
 for yi in range(0,xDim-1):
-    ax.plot([yi+0.5,yi+0.5], [0-0.5,xDim+0.5], color='black', linewidth=2)
+    ax.plot([yi+0.5,yi+0.5], [0-0.5,yDim+0.5], color='black', linewidth=2)
 
 # special thick lines seperating default run and optimised runs
 ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
 ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
+if xDim > 6:
+  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
 
 # special thick lines for the outside boarders
-ax.plot([-0.5, 5.5], [-0.5,-0.5], color='black', linewidth=5)
-ax.plot([-0.5, 5.5], [ 5.5, 5.5], color='black', linewidth=5)
-ax.plot([-0.5,-0.5], [-0.5, 5.5], color='black', linewidth=5)
-ax.plot([ 5.5, 5.5], [-0.5, 5.5], color='black', linewidth=5)
+ax.plot([-0.5, xDim-0.5], [-0.5,-0.5], color='black', linewidth=5)
+ax.plot([-0.5, xDim-0.5], [ yDim-0.5, yDim-0.5], color='black', linewidth=5)
+ax.plot([-0.5,-0.5], [-0.5, yDim-0.5], color='black', linewidth=5)
+ax.plot([ xDim-0.5, xDim-0.5], [-0.5, yDim-0.5], color='black', linewidth=5)
 
 # long names of these variables IN REVERSE
 TableVarLongNames = ['Mixing Ratio \n [g/kg]', 'Potential Temp \n [K]', 'Temperature \n [K]',
@@ -2280,7 +2294,10 @@ cbar.set_ticks([-1.00, 0.0, 1.00])
 cbar.set_ticklabels(['100% Decrease', 'Same', '100% Increase'])
 cbar.ax.tick_params(labelsize=13)
 
-
+if xDim > 6:
+  thisFontSize=9
+else:
+  thisFontSize=18
 
 # add numbers in each cell
 for xstri in range(np.size(TableXstrs)):
@@ -2292,9 +2309,9 @@ for xstri in range(np.size(TableXstrs)):
 
             # place a black number if the cell is a light colour
             if (localcolor >= -0.05) and (localcolor <= 0.05) :
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='black', fontsize=18)
+                text = ax.text(xstri-0.28, vari-0.08, str(number), c='black', fontsize=thisFontSize)
             else:
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='white', fontsize=18)
+                text = ax.text(xstri-0.28, vari-0.08, str(number), c='white', fontsize=thisFontSize)
                 text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
 
 # SAVE THE RMSE PLOT
