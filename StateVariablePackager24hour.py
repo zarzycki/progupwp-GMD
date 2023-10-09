@@ -56,6 +56,9 @@ OverallStartHour =  0     # hour of the day you want to start the grouping brack
 MissionNames = ['Atalante_Meteomodem', 'Atalante_Vaisala' , 'BCO_Vaisala'     , \
                 'Meteor_Vaisala'     , 'MS-Merian_Vaisala', 'RonBrown_Vaisala']
 
+#OriginalVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta','p']
+#ObsVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta','p']
+#PlotVarStrings     = ['T' , 'Q', 'U', 'V', 'Hwind', 'theta','PMID']
 OriginalVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta']
 ObsVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta']
 PlotVarStrings     = ['T' , 'Q', 'U', 'V', 'Hwind', 'theta']

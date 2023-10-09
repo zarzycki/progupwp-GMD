@@ -48,6 +48,8 @@ MissionNames = ['Atalante_Meteomodem', 'Atalante_Vaisala' , 'BCO_Vaisala'     , 
 
 PlotVarStrings     = ['T',  'Q', 'U', 'V', 'Hwind', 'theta']
 OriginalVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta']
+#PlotVarStrings     = ['T',  'Q', 'U', 'V', 'Hwind', 'theta','PMID']
+#OriginalVarStrings = ['ta', 'q', 'u', 'v', 'Hwind', 'theta','p']
 
 # THESE FIRST 3 BLOCKS ARE FOR IF THE USER WANTS TO GET ERRORS FOR PARTICULAR HOUR BLOCKS
 

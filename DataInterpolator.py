@@ -932,9 +932,10 @@ warnings.filterwarnings('ignore')
 
 
 # variables that you want to add
+#SoundingVariables = ['ta','q','u','v', 'theta','p']
+#CESMvariables = ['T','Q','U','V', 'THETAC','PMID']
 SoundingVariables = ['ta','q','u','v', 'theta']
 CESMvariables = ['T','Q','U','V', 'THETAC']
-
 
 # ships and CESM configurations you want to deal with
 
