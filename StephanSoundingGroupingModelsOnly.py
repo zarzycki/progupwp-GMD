@@ -46,6 +46,11 @@ if not bool(VOLNAME):
     print("Need to specify VOLNAME")
     quit()
 
+if bool(thisxStr):
+    refxStr=thisxStr
+else:
+    refxStr='x001'
+print(refxStr)
 
 # strings which name the missions, model configurations, hour blocks, and variables
 # that will be looped over
@@ -129,8 +134,8 @@ for missi in range(0, np.size(MissionNames ) ): # loop over each sounding file
     MISSIONNAME = MissionNames[missi]
 
     # Download each data file for some given model config and lead time just to count the soudings
-    StorageFolder = VOLNAME+'/ThesisData/StephanSoundings/WithCESMdata/x001/'
-    dummyStorageFile = 'EUREC4A_' + MISSIONNAME + '-RS_L2_v3.0.0-x001_LeadDay1wTurb.nc'
+    StorageFolder = VOLNAME+'/ThesisData/StephanSoundings/WithCESMdata/'+refxStr+'/'
+    dummyStorageFile = 'EUREC4A_' + MISSIONNAME + '-RS_L2_v3.0.0-'+refxStr+'_LeadDay1wTurb.nc'
 
     dummySoundingDataPlus = xr.open_dataset( StorageFolder + dummyStorageFile, engine='netcdf4')
 
