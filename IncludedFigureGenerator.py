@@ -187,7 +187,7 @@ print_break()
 # THIS BLOCK DOWNLOADS STORED PROFILES OF dU/dZ and K_eff and FINDS WHERE THERE ARE TRUE UPGRADIENT FLUXES
 
 #set the threshold for how large dU/dZ has to be to really consider an upgradient flux
-dUdZthreshold = 0.07 # [m/s per km]
+dUdZthreshold = 0.10 # [m/s per km]
 # and convert to SI units ( m/s / m)
 SIdUdZthreshold = 0.001 * dUdZthreshold
 
@@ -215,9 +215,15 @@ for xStr in xStrs:
 
     exec("DualMap" + xStr + " = TrueUpgradientMap" + xStr + " + UpgradientMap" + xStr )
 
+    # Print minimum "valid" dudz not filtered out
+    print(xStr)
+    exec("cmz_dudz = np.abs(dUdZprofiles" + xStr +")")
+    exec("cmz_dual = DualMap" + xStr)
+    actualvals = np.where(cmz_dual == 2,cmz_dudz,1000000.)
+    print(np.nanmin(actualvals))
+    # If 100000. that means there are no "true" Keff < 0 lines.
 
 print_break()
-
 
 # THIS BLOCK ACTUALLY CREATES PLOTS OF WHERE UPGRADIENT FLUXES OCCUR
 # pressure level limits for the plot
@@ -464,6 +470,57 @@ for vari in range(0, np.size(TurbVars)):
 
 print_break()
 
+plot_cm1=True
+if plot_cm1:
+    cm1_start_index = 1    # what "level" do we start plotting at (0 means plot all)
+    cm1files = ['avg.nc']
+    cm1colors = ['gray']
+
+    # Initialize arrays
+    cm1_num_files = len(cm1files)
+    cm1u = [None] * cm1_num_files
+    cm1z = [None] * cm1_num_files
+    cm1v = [None] * cm1_num_files
+    cm1t = [None] * cm1_num_files
+    cm1th = [None] * cm1_num_files
+    cm1q = [None] * cm1_num_files
+    cm1wsp = [None] * cm1_num_files
+    cm1upwp = [None] * cm1_num_files
+    cm1vpwp = [None] * cm1_num_files
+    cm1vg = [None] * cm1_num_files
+    cm1ug = [None] * cm1_num_files
+    cm1wprof = [None] * cm1_num_files
+
+    # Loop over files and load data into arrays
+    for i, cm1file in enumerate(cm1files):
+        cm1data = xr.open_dataset(cm1file, engine='netcdf4')
+        cmz_print_filename(cm1file)
+        cm1u[i] = cm1data.u.values[0,:,0,0]
+        cm1z[i] = cm1data.zh.values[:]
+        cm1z[i] = cm1z[i] / 1000.
+        cm1v[i] = cm1data.v.values[0,:,0,0]
+        cm1t[i] = cm1data.t.values[0,:,0,0]
+        cm1th[i] = cm1data.th.values[0,:,0,0]
+        cm1q[i] = cm1data.qv.values[0,:,0,0]
+        cm1q[i] = cm1q[i] * 1000
+        cm1wsp[i] = cm1data.wsp.values[0,:,0,0]
+        cm1upwp[i] = cm1data.upwp.values[0,:,0,0]
+        cm1vpwp[i] = cm1data.vpwp.values[0,:,0,0]
+        cm1ug[i] = cm1data.ug.values[0,:,0,0]
+        cm1vg[i] = cm1data.vg.values[0,:,0,0]
+        cm1wprof[i] = cm1data.wprof.values[0,1::,0,0]
+
+    # Create a dictionary to simplify plotting logic
+    cm1_data_dict = {
+        'U': cm1u,
+        'V': cm1v,
+        'T': cm1t,
+        'Q': cm1q,
+        'Hwind': cm1wsp,
+        'theta': cm1th,
+        'UpWp': cm1upwp,
+        'VpWp': cm1vpwp
+    }
 
 
 # THIS BLOCK PLOTS RMSE or MEAN PROFILES FOR MANY RUNS/LEADS ON ONE PLOT
@@ -889,12 +946,22 @@ for xx in range(arr_ncases):
 
     #       retrieve the means from observations for non-turbulence variables
             if  (Var in Vars):
-                #ObsMeans_name = VOLNAME+'VARIABLES/24HourBlocks/00UTCstart/Observations/' + \
-                #'Means/Obs' + Var + 'Mean_00UTCstart24HourBlocks.npy'
-                ObsMeans_name = VOLNAME+'/ThesisVariables/' + \
-                'Obs' + Var + 'Mean_00UTCstart24HourBlocks.npy'
-                ObsMeans = np.load(ObsMeans_name)
-                cmz_print_filename(ObsMeans_name)
+                if Var == "Hwind":
+                    print("special Hwind treatment!")
+                    tmp1name=VOLNAME+'/ThesisVariables/' + \
+                    'Obs' + 'U' + 'Mean_00UTCstart24HourBlocks.npy'
+                    tmp2name=VOLNAME+'/ThesisVariables/' + \
+                    'Obs' + 'V' + 'Mean_00UTCstart24HourBlocks.npy'
+                    cmz_print_filename(tmp1name)
+                    cmz_print_filename(tmp2name)
+                    tmp1 = np.load(tmp1name)
+                    tmp2 = np.load(tmp2name)
+                    ObsMeans = np.sqrt(tmp1**2 + tmp2**2)
+                else:
+                    ObsMeans_name = VOLNAME+'/ThesisVariables/' + \
+                    'Obs' + Var + 'Mean_00UTCstart24HourBlocks.npy'
+                    ObsMeans = np.load(ObsMeans_name)
+                    cmz_print_filename(ObsMeans_name)
 
             # take only the bottom 501 entries
             ObsMeansToPlot = np.reshape(ObsMeans,[3100])[0:maxAlti]
@@ -906,6 +973,15 @@ for xx in range(arr_ncases):
                 plt.plot(ObsMeansToPlot[minAlti:maxAlti], AltsToPlot, color = 'k', linewidth=2.0, \
                          label='Observations')
 
+            if plot_cm1:
+                # Check if Var exists in dictionary
+                if Var in cm1_data_dict:
+                    # Plot data for each file
+                    for i, datatmp in enumerate(cm1_data_dict[Var]):
+                        plt.plot(datatmp[cm1_start_index::], cm1z[i][cm1_start_index::], color=cm1colors[i % len(cm1colors)], linewidth=1.5, label='CM1')
+                else:
+                    print(f"CM1 variable '{Var}' not recognized.")
+
             # retrieve the means from model output for each run
             local_xstri = -1  # set starting local loop index
             for xStr in ChosenXstrs[0:LastXstr] :
@@ -913,10 +989,11 @@ for xx in range(arr_ncases):
                 # retrieve the index of the chosen xStr in the master xStr list for plotting purposes
                 xstri = corr_xstri[local_xstri]
 
-                # retrievet the RMSE storage array for this variable
-                exec("MeansToPlot = " + Var + "_MeansArray[xstri,lead,0:maxAlti]")
-                # select only the altitudes beneath the chosen macumum
-    #             AltsToPlot = alts[0:maxAlti]
+                if Var == "Hwind":
+                    exec("MeansToPlot = np.sqrt(U_MeansArray[xstri,lead,0:maxAlti]**2 + V_MeansArray[xstri,lead,0:maxAlti]**2)")
+                    print("special hwind model treatment!")
+                else:
+                    exec("MeansToPlot = " + Var + "_MeansArray[xstri,lead,0:maxAlti]")
 
                 # PLOT THE ACTUAL LINE
                 if (xStr == 'x001'):
@@ -926,12 +1003,8 @@ for xx in range(arr_ncases):
                     plt.plot(MeansToPlot[minAlti:maxAlti], AltsToPlot, linestyle='--', \
                              color = PlotxStrColours[xstri], linewidth=thickness, label=xStr)
 
-
-
-
             # plot accessories
             plt.grid('on', linewidth=0.25)
-
 
             # label with the corresponding variable name whether its a state or a turbulence variable
             # include a legend with 'observations' only for non-turbulence variables
@@ -943,12 +1016,18 @@ for xx in range(arr_ncases):
                 if(TitleOption == 'yes'):
                     plt.title(str(lead) + '-Day Lead Vertical Mean Profiles for ' + VarLongNames[vari])
 
+                special_strings = 'Observations'
+
+                # If plotting CM1, glue that into the special strings array
+                if plot_cm1:
+                    special_strings = np.append(special_strings,'CM1')
+
                 if(LegendOption=='left'):
-                    ax.legend((np.append('Observations', ChosenXstrs[0:LastXstr])), bbox_to_anchor=(0.03, 0.9))
+                    ax.legend((np.append(special_strings, ChosenXstrs[0:LastXstr])), bbox_to_anchor=(0.03, 0.9))
                 elif(LegendOption=='inside'):
-                    plt.legend((np.append('Observations', ChosenXstrs[0:LastXstr])),loc='lower right')
+                    plt.legend((np.append(special_strings, ChosenXstrs[0:LastXstr])),loc='lower right')
                 elif(LegendOption=='right'):
-                    ax.legend((np.append('Observations', ChosenXstrs[0:LastXstr])), bbox_to_anchor=(1.17, 0.9))
+                    ax.legend((np.append(special_strings, ChosenXstrs[0:LastXstr])), bbox_to_anchor=(1.17, 0.9))
 
             elif (Var in TurbVars):
                 plt.xlabel('Mean ' + TurbVarLongNames[turbvari]  + ' [' + TurbVarUnitses[turbvari] + ']',fontsize=plot_fontsize)
@@ -1151,6 +1230,13 @@ for xx in range(arr_ncases):
                     plt.plot(MeansToPlot, AltsToPlot*0.001, color = PlotxStrColours[xstri], \
                          linestyle='--', linewidth=thickness)
 
+            # Check if Var exists in dictionary
+            if Var in cm1_data_dict:
+                # Plot data for each file
+                for i, datatmp in enumerate(cm1_data_dict[Var]):
+                    plt.plot(datatmp[cm1_start_index::], cm1z[i][cm1_start_index::], color=cm1colors[i % len(cm1colors)], linewidth=1.5, label='CM1')
+            else:
+                print(f"CM1 Variable '{Var}' not recognized.")
 
             # plot accessories
             plt.grid('on', linewidth=0.25)
