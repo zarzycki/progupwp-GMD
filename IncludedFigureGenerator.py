@@ -473,7 +473,7 @@ print_break()
 plot_cm1=True
 if plot_cm1:
     cm1_start_index = 1    # what "level" do we start plotting at (0 means plot all)
-    cm1files = ['avg.nc']
+    cm1files = ['cm1-reference/avg.nc']
     cm1colors = ['gray']
 
     # Initialize arrays
