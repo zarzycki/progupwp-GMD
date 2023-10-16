@@ -1,2 +1,4 @@
+*.ipynb_checkpoints/
+batch.sh.*
 *.out
 *.txt
