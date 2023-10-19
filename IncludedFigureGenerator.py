@@ -37,6 +37,7 @@ def get_arg(index):
 
 #CMZ adding general volume path
 VOLNAME=get_arg(1)
+RAWDATA=get_arg(2)
 FILEOUTTYPE = 'pdf'  # png or pdf
 
 if not bool(VOLNAME):
@@ -100,7 +101,7 @@ for missi in range(0, len(MissionNames)):
 NumTotalSoundings = 1546
 
 # retrieve the sizes of CAM output arrays
-this_filename=VOLNAME+'/DATA/LargeDomainCESMoutput/x001/' + \
+this_filename=RAWDATA+'/DATA/LargeDomainCESMoutput/x001/' + \
                        'LeadDay1/FHIST-ne30-ATOMIC-ERA5-x001.cam.h3.2020-01-06-00000.nc'
 cmz_print_filename(this_filename)
 dummyCAMoutput = xr.open_dataset(this_filename, engine='netcdf4')
@@ -134,7 +135,7 @@ xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303',
 # # THIS BLOCK CREATES 1546 x NumLev Arrays for CAM U wind, Z height, and U'W' momentum flux for all soundings
 
 ## CMZ add if flag
-cmz_calc_cg=False
+cmz_calc_cg=True
 
 if cmz_calc_cg:
     for xstri in range(0, len(xStrs)):
@@ -153,7 +154,7 @@ if cmz_calc_cg:
             if ( (YYYYMMDD != '2020-02-27') and (YYYYMMDD != '2020-02-28') and (YYYYMMDD != '2020-02-29') and \
                  (YYYYMMDD != '2020-03-01') and (YYYYMMDD != 'yyyy-mm-dd') ):
 
-                CAMoutput = xr.open_dataset(VOLNAME+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay1/' +\
+                CAMoutput = xr.open_dataset(RAWDATA+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay1/' +\
                                             'FHIST-ne30-ATOMIC-ERA5-' + xStr + '.cam.h3.' + YYYYMMDD + '-00000.nc', \
                                             engine='netcdf4')
 
@@ -337,9 +338,9 @@ for chosexstri in range(0, np.size(ChosenXstrs)):
 # Retrieve altitudes to plot against
 
 
-dummySoundingData = xr.open_dataset(VOLNAME+'/DATA/StephanSoundings/OriginalDownloads/' + \
+dummySoundingData = xr.open_dataset(RAWDATA+'/DATA/StephanSoundings/OriginalDownloads/' + \
                     'EUREC4A_Atalante_Vaisala-RS_L2_v3.0.0.nc', engine='netcdf4')
-cmz_print_filename(VOLNAME+'/DATA/StephanSoundings/OriginalDownloads/' + \
+cmz_print_filename(RAWDATA+'/DATA/StephanSoundings/OriginalDownloads/' + \
                     'EUREC4A_Atalante_Vaisala-RS_L2_v3.0.0.nc')
 
 alts = np.array(dummySoundingData.alt)

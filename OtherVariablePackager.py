@@ -29,7 +29,8 @@ def get_arg(index):
 
 #CMZ adding general volume path
 VOLNAME=get_arg(1)
-thisxStr=get_arg(2)
+RAWDATA=get_arg(2)
+thisxStr=get_arg(3)
 
 #xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
 if bool(thisxStr):
@@ -90,7 +91,7 @@ for missi in range(0, len(MissionNames)):
 # I know ahead of time that there are 1546 total soundings
 NumTotalSoundings = 1546
 
-dummyCAMoutput = xr.open_dataset(VOLNAME+'/DATA/LargeDomainCESMoutput/x001/' + \
+dummyCAMoutput = xr.open_dataset(RAWDATA+'/DATA/LargeDomainCESMoutput/x001/' + \
                        'LeadDay1/FHIST-ne30-ATOMIC-ERA5-x001.cam.h3.2020-01-06-00000.nc', engine='netcdf4')
 
 NumTimes = np.size(dummyCAMoutput.time)
@@ -125,7 +126,7 @@ for xstri in range(0, len(xStrs)):
         if ( (YYYYMMDD != '2020-02-27') and (YYYYMMDD != '2020-02-28') and (YYYYMMDD != '2020-02-29') and \
              (YYYYMMDD != '2020-03-01') and (YYYYMMDD != 'yyyy-mm-dd') ):
 
-            CAMoutput = xr.open_dataset(VOLNAME+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay1/' +\
+            CAMoutput = xr.open_dataset(RAWDATA+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay1/' +\
                                         'FHIST-ne30-ATOMIC-ERA5-' + xStr + '.cam.h3.' + YYYYMMDD + '-00000.nc', \
                                         engine='netcdf4')
 
@@ -195,7 +196,7 @@ MissionNames = ['Atalante_Meteomodem', 'Atalante_Vaisala' , 'BCO_Vaisala'     , 
 # CMZ, let's just keep xStrs from before
 
 # grab an example .h4 file to collect sizes from
-dummyH4data = xr.open_dataset(VOLNAME+'/DATA/LargeDomainCESMoutput/x101/h4/LeadDay1/' + \
+dummyH4data = xr.open_dataset(RAWDATA+'/DATA/LargeDomainCESMoutput/x101/h4/LeadDay1/' + \
                                'FHIST-ne30-ATOMIC-ERA5-x101.cam.h4.2020-01-06-00000.nc', engine='netcdf4')
 
 NumDays = 52 # there are 52 days for which H4 data are downloaded
@@ -257,7 +258,7 @@ for xstri in range(0, len(xStrs)):
             print('Working on 2020-' + MM + '-' + DD)
 
             # get the H4 data for this day
-            H4data = xr.open_dataset(VOLNAME+'/DATA/LargeDomainCESMoutput/' + xStr + '/' + \
+            H4data = xr.open_dataset(RAWDATA+'/DATA/LargeDomainCESMoutput/' + xStr + '/' + \
                            'h4/LeadDay' + str(lead) + '/FHIST-ne30-ATOMIC-ERA5-' + xStr + \
                            '.cam.h4.2020-' + MM + '-' + DD +'-00000.nc', engine='netcdf4')
 
@@ -269,7 +270,7 @@ for xstri in range(0, len(xStrs)):
 
 
             # get the H3 data for this day
-            H3data = xr.open_dataset(VOLNAME+'/DATA/LargeDomainCESMoutput/' + xStr + '/' + \
+            H3data = xr.open_dataset(RAWDATA+'/DATA/LargeDomainCESMoutput/' + xStr + '/' + \
                 'LeadDay' + str(lead) + '/FHIST-ne30-ATOMIC-ERA5-' + xStr + \
                 '.cam.h3.2020-' + MM + '-' + DD +'-00000.nc',\
                 engine='netcdf4')

@@ -23,7 +23,8 @@ def get_arg(index):
 
 #CMZ adding general volume path
 VOLNAME=get_arg(1)
-thisxStr=get_arg(2)
+RAWDATA=get_arg(2)
+thisxStr=get_arg(3)
 
 if not bool(VOLNAME):
     print("Need to specify VOLNAME")
@@ -36,7 +37,7 @@ print("--> Adding theta to h3 data")
 # first grab hyam and hybm from .h4 data to later calculate pressure levels
 
 # grab an example .h4 file (all hyam and hymb data are the same across time, column, model config)
-dummyH4data = xr.open_dataset(VOLNAME+'/DATA/LargeDomainCESMoutput/x101/h4/LeadDay1/' + \
+dummyH4data = xr.open_dataset(RAWDATA+'/DATA/LargeDomainCESMoutput/x101/h4/LeadDay1/' + \
                                'FHIST-ne30-ATOMIC-ERA5-x101.cam.h4.2020-01-06-00000.nc', engine='netcdf4')
 # collect the components of calculating pressure and turn them into numpy arrays
 hyamList     = np.array(dummyH4data.hyam)
@@ -76,7 +77,7 @@ for xStr in xStrs:
 
             TimeB = datetime.datetime.now()
             # path names for downloading files
-            H3OGdownloadFolder = VOLNAME+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay' + str(lead) + '/'
+            H3OGdownloadFolder = RAWDATA+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay' + str(lead) + '/'
             H3OriginalFileName       = 'FHIST-ne30-ATOMIC-ERA5-' + xStr + '.cam.h3.2020-' + MMdDD + '-00000.nc'
             H3OriginalFileNameSansNC = 'FHIST-ne30-ATOMIC-ERA5-' + xStr + '.cam.h3.2020-' + MMdDD + '-00000'
             # actually import the original CESM output data
@@ -797,7 +798,7 @@ def AddMoreCESMvalues(EnhancedSoundingData, CESMvars):
                     # Download CESM Output from Home Computer/Downloads (originally from group storage)
                     # spefically for the day of this dropsonde launch
                     CESMdata = xr.open_dataset\
-                    (VOLNAME+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay' + str(lead) + \
+                    (RAWDATA+'/DATA/LargeDomainCESMoutput/' + xStr + '/LeadDay' + str(lead) + \
                      '/FHIST-ne30-ATOMIC-ERA5-' + xStr + '.cam.h3.' + yyyy_mm_dd +
                      '-00000.nc',engine='netcdf4')
 
@@ -887,7 +888,7 @@ def AddMoreCESMvalues(EnhancedSoundingData, CESMvars):
 
 
         SampleCESMdata = xr.open_dataset\
-                    (VOLNAME+'/DATA/LargeDomainCESMoutput/x001/LeadDay0' + \
+                    (RAWDATA+'/DATA/LargeDomainCESMoutput/x001/LeadDay0' + \
                      '/FHIST-ne30-ATOMIC-ERA5-x001.cam.h3.2020-02-07' + '-00000.nc',engine='netcdf4')
 
         SampleCESMdataVar = xr.DataArray(SampleCESMdata.variables[ CESMvars[vari] ] )
@@ -963,7 +964,7 @@ for missi in range(0, np.size(MissionNames) ):
 
             # DOWNLOAD DATA (5 seperate files, 1 for each ship)
             # USING LEVEL 2 DATA BECAUSE IT WORKS, NOT BECAUSE I KNOW WHAT THE OTHER LEVELS DO!!!
-            OriginalFolder = VOLNAME+'/DATA/StephanSoundings/OriginalDownloads/'
+            OriginalFolder = RAWDATA+'/DATA/StephanSoundings/OriginalDownloads/'
 #             OriginalFolder = VOLNAME+'/ThesisData/StephanSoundings/WithMoreCESMdata/' + xStr + '/'
             OriginalFileNameSansNC = 'EUREC4A_' + MISSIONNAME + '-RS_L2_v3.0.0'
             SoundingDataPath = OriginalFolder + OriginalFileNameSansNC + '.nc'

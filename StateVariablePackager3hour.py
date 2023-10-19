@@ -29,7 +29,8 @@ def get_arg(index):
 
 #CMZ adding general volume path
 VOLNAME=get_arg(1)
-thisxStr=get_arg(2)
+RAWDATA=get_arg(2)
+thisxStr=get_arg(3)
 
 #xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
 if bool(thisxStr):
@@ -203,7 +204,7 @@ for missi in range(0, np.size(MissionNames) ): # loop over each sounding file
     print(MISSIONNAME)
 
     # Download the observational data in soundings
-    StorageFolder = VOLNAME+'/DATA/StephanSoundings/OriginalDownloads/'
+    StorageFolder = RAWDATA+'/DATA/StephanSoundings/OriginalDownloads/'
     StorageFile = 'EUREC4A_' + MISSIONNAME + '-RS_L2_v3.0.0.nc'
 
     SoundingData = xr.open_dataset( StorageFolder + StorageFile, engine='netcdf4')
