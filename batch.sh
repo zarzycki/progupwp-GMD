@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --nodes=1 
+#SBATCH --nodes=1
 #SBATCH --ntasks=12
 #SBATCH --mem=100GB
 #SBATCH --time=12:00:00
@@ -7,19 +7,20 @@
 
 date >> timing.txt
 
+RAWDATADIR=/storage/home/cmz5202/group/sag5649/EUREC4A_proc/
 BASEDIR=/storage/home/cmz5202/scratch/progupwp/
 N=10
 configs=("x001" "x101" "x201" "x202" "x203" "x204" "x301" "x302" "x303" "x304")
 
-conda activate graap
+conda activate graap2
 
 # Loop over and process raw CAM data
 for i in "${configs[@]}" ; do
   (
     echo $i
-    #sleep $((RANDOM % 10))
-    python DataInterpolator.py $BASEDIR $i
-    python StateVariablePackager3hour.py $BASEDIR $i
+    sleep $((RANDOM % 10))
+    python DataInterpolator.py $BASEDIR $RAWDATADIR $i
+    python StateVariablePackager3hour.py $BASEDIR $RAWDATADIR $i
     python StateVariablePackager24hour.py $BASEDIR $i
     python StephanSoundingGroupingModelsOnly.py $BASEDIR $i
   ) &
@@ -37,11 +38,11 @@ done
 wait
 
 # Extract turbulence budgets for two runs
-python OtherVariablePackager.py $BASEDIR x101
-python OtherVariablePackager.py $BASEDIR x204
+python OtherVariablePackager.py $BASEDIR $RAWDATADIR x101
+python OtherVariablePackager.py $BASEDIR $RAWDATADIR x204
 
 # Generate figures
-python IncludedFigureGenerator.py $BASEDIR
+python IncludedFigureGenerator.py $BASEDIR $RAWDATADIR
 
 date >> timing.txt
 echo "-------" >> timing.txt
