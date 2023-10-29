@@ -36,8 +36,9 @@ def get_arg(index):
 
 
 #CMZ adding general volume path
-VOLNAME=get_arg(1)
-RAWDATA=get_arg(2)
+VOLNAME=get_arg(1)+"/"
+RAWDATA=get_arg(2)+"/"
+SAVEFOLDER=get_arg(3)+"/"
 FILEOUTTYPE = 'pdf'  # png or pdf
 
 if not bool(VOLNAME):
@@ -134,12 +135,14 @@ xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303',
 
 # # THIS BLOCK CREATES 1546 x NumLev Arrays for CAM U wind, Z height, and U'W' momentum flux for all soundings
 
-## CMZ add if flag
-cmz_calc_cg=True
+for xstri in range(0, len(xStrs)):
 
-if cmz_calc_cg:
-    for xstri in range(0, len(xStrs)):
-        xStr = xStrs[xstri]
+    xStr = xStrs[xstri]
+
+    file_dUdZ = VOLNAME+'/ThesisVariables/METEO600dUdZprofiles' + xStr + '.npy'
+    file_Keff = VOLNAME+'/ThesisVariables/METEO600KeffProfiles' + xStr + '.npy'
+
+    if not os.path.exists(file_dUdZ) or not os.path.exists(file_Keff):
         print('Updating dudz and keff profiles for '+xStr)
 
         # loop over all soundings
@@ -178,12 +181,12 @@ if cmz_calc_cg:
                 dUdZprofiles[totalsoundi, levi+1] = dUdZ
                 KeffProfiles[totalsoundi, levi+1] = -1 * (UPWPprofiles[totalsoundi, levi+1] / dUdZ)
 
-        np.save(VOLNAME+'/ThesisVariables/METEO600dUdZprofiles' + xStr + '.npy', dUdZprofiles)
-        np.save(VOLNAME+'/ThesisVariables/METEO600KeffProfiles' + xStr + '.npy', KeffProfiles)
-
+        np.save(file_dUdZ, dUdZprofiles)
+        np.save(file_Keff, KeffProfiles)
+    else:
+        print("Both Keff and DUDZ files exist for "+xStr)
 
 print_break()
-
 
 # THIS BLOCK DOWNLOADS STORED PROFILES OF dU/dZ and K_eff and FINDS WHERE THERE ARE TRUE UPGRADIENT FLUXES
 
@@ -297,12 +300,10 @@ for xstri in range(0, len(xStrs)):
 #     plt.xlabel('Sounding Index', fontsize=20)
     plt.ylabel('Estimated\nPressure Level\n[hPa]', fontsize=16)
 
+    if not os.path.exists(SAVEFOLDER):
+        os.makedirs(SAVEFOLDER)
 
-    SaveFolder = VOLNAME+'/ThesisPlots/'
-    if not os.path.exists(SaveFolder):
-        os.makedirs(SaveFolder)
-
-    savefigname=SaveFolder + 'UpgradientFluxMap' + xStr + PlotLabelText + 'SansXlabel.png'
+    savefigname=SAVEFOLDER + 'UpgradientFluxMap' + xStr + PlotLabelText + 'SansXlabel.png'
     plt.savefig(savefigname, \
                          facecolor='w',dpi=my_dpi, bbox_inches='tight')
     #savefigname=SaveFolder + 'UpgradientFluxMap' + xStr + PlotLabelText + 'SansXlabel.eps'
@@ -831,12 +832,10 @@ for xx in range(arr_ncases):
         #         # include a thin red 2.5 km line (for where the integrated calculations are cutoff)
         #         plt.plot([RMSExmin,RMSExmax],[2500,2500],'r', linewidth=0.75)
 
-                SaveFolder = VOLNAME+'ThesisPlots/'
+                if not os.path.exists(SAVEFOLDER):
+                    os.makedirs(SAVEFOLDER)
 
-                if not os.path.exists(SaveFolder):
-                    os.makedirs(SaveFolder)
-
-                savefigname=SaveFolder + Var + 'RMSEprofiles' + str(lead) + 'DayLead' + \
+                savefigname=SAVEFOLDER + Var + 'RMSEprofiles' + str(lead) + 'DayLead' + \
                             ChosenXstrs[0] + ChosenXstrs[LastXstr-1] + '_' + str(maxAlt) + \
                             'm' + AnnoStyle + '.'+FILEOUTTYPE
                 plt.savefig( savefigname , \
@@ -926,12 +925,10 @@ for xx in range(arr_ncases):
                 plt.plot([0,0],[0,maxAlt],'k', linewidth=0.5)
 
 
-                SaveFolder = VOLNAME+'ThesisPlots/'
+                if not os.path.exists(SAVEFOLDER):
+                    os.makedirs(SAVEFOLDER)
 
-                if not os.path.exists(SaveFolder):
-                    os.makedirs(SaveFolder)
-
-                savefigname=SaveFolder + Var + 'BiasProfiles' + str(lead) + 'DayLead' + \
+                savefigname=SAVEFOLDER + Var + 'BiasProfiles' + str(lead) + 'DayLead' + \
                             ChosenXstrs[0] + ChosenXstrs[LastXstr-1] + '_' + str(maxAlt) + \
                             'm' + AnnoStyle + '.'+FILEOUTTYPE
                 plt.savefig( savefigname, \
@@ -1056,12 +1053,10 @@ for xx in range(arr_ncases):
             # include a thin black y-axis line
             plt.plot([0,0],[0,maxAlt],'k', linewidth=0.5)
 
-            SaveFolder = VOLNAME+'/ThesisPlots/'
+            if not os.path.exists(SAVEFOLDER):
+                os.makedirs(SAVEFOLDER)
 
-            if not os.path.exists(SaveFolder):
-                os.makedirs(SaveFolder)
-
-            savefigname=SaveFolder + Var + 'MeanProfiles' + str(lead) + 'DayLead' + \
+            savefigname=SAVEFOLDER + Var + 'MeanProfiles' + str(lead) + 'DayLead' + \
                         ChosenXstrs[0] + ChosenXstrs[LastXstr-1] + '_' + str(maxAlt) + \
                         'm' + AnnoStyle + '.'+FILEOUTTYPE
             plt.savefig( savefigname, \
@@ -1261,13 +1256,10 @@ for xx in range(arr_ncases):
             # include a thin black y-axis line
             plt.plot([0,0],[0,maxAlt],'k', linewidth=0.5)
 
-            SaveFolder = VOLNAME+'/ThesisPlots/'
+            if not os.path.exists(SAVEFOLDER):
+                os.makedirs(SAVEFOLDER)
 
-
-            if not os.path.exists(SaveFolder):
-                os.makedirs(SaveFolder)
-
-            savefigname=SaveFolder + Var + '_MeanProfiles' + str(lead) + 'DayLead' + \
+            savefigname=SAVEFOLDER + Var + '_MeanProfiles' + str(lead) + 'DayLead' + \
                         ChosenXstrs[0] + ChosenXstrs[LastXstr-1] + '_2500mTopSansTitleSanLegend.'+FILEOUTTYPE
             plt.savefig( savefigname, \
                         facecolor='w',dpi=300)
@@ -1466,14 +1458,10 @@ for xstri in range(0, np.size(xStrs)):
 
         # ACTUAL PLOTS
 
-        # SAVE EACH PLOT AS A FILE
-        SaveFolder = VOLNAME+'/ThesisPlots/'
-
-        if not os.path.exists(SaveFolder):
-            os.makedirs(SaveFolder)
+        if not os.path.exists(SAVEFOLDER):
+            os.makedirs(SAVEFOLDER)
 
         SaveFile = VarStr + '_TimeHeightObs' + str(lead) + 'DayLead' + xStr + TimeMode + 'SansLegend.'+FILEOUTTYPE
-
 #         plt.savefig( SaveFolder + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
 
 
@@ -1556,16 +1544,14 @@ for xstri in range(0, np.size(xStrs)):
 
 
         # SAVE EACH PLOT AS A FILE
-        SaveFolder = VOLNAME+'/ThesisPlots/'
 
-
-        if not os.path.exists(SaveFolder):
-            os.makedirs(SaveFolder)
+        if not os.path.exists(SAVEFOLDER):
+            os.makedirs(SAVEFOLDER)
 
         SaveFile = VarStr + '_TimeHeightBias' + str(lead) + 'DayLead' + xStr + TimeMode + '.'+FILEOUTTYPE
 
-        plt.savefig( SaveFolder + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
-        cmz_writing_fig(SaveFolder + SaveFile,6)
+        plt.savefig( SAVEFOLDER + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
+        cmz_writing_fig(SAVEFOLDER + SaveFile,6)
         plt.close()
 
 print_break()
@@ -1821,17 +1807,14 @@ for vari in range(2,5): # np.size(Vars)):
     Yposition = np.max(VarYLims) - ( (np.max(VarYLims) - np.min(VarYLims)) * 0.15)
     plt.text(Xposition,Yposition, PlotLabelText ,fontsize=24,weight='bold')
 
-    #     SAVE EACH PLOT AS A FILE
-    SaveFolder = VOLNAME+'/ThesisPlots/'
-
-    if not os.path.exists(SaveFolder):
-        os.makedirs(SaveFolder)
+    if not os.path.exists(SAVEFOLDER):
+        os.makedirs(SAVEFOLDER)
 
     SaveFile = VarStr + '_TimePlot' + TimeMode + str(BotAlt) + 'mTO' + str(TopAlt) + 'm' + xStrs[0] + \
     xStrs[-1] + 'SansLegend.'+FILEOUTTYPE
 
-    plt.savefig( SaveFolder + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
-    cmz_writing_fig(SaveFolder + SaveFile,7)
+    plt.savefig( SAVEFOLDER + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
+    cmz_writing_fig(SAVEFOLDER + SaveFile,7)
     plt.close()
 
 
@@ -1947,19 +1930,16 @@ for xstri in range(0, np.size(xStrs)):
     plt.plot([0,0],[0,MaxPlotAlt],'k',linewidth=0.5)
 
 
-
-    SaveFolder = VOLNAME+'/ThesisPlots/'
-
-    if not os.path.exists(SaveFolder):
-        os.makedirs(SaveFolder)
+    if not os.path.exists(SAVEFOLDER):
+        os.makedirs(SAVEFOLDER)
 
     if xStr == "x204":
         SaveFile = xStr + 'UPWPComponentProfilesValtx10RightLegend.'+FILEOUTTYPE
     else:
         SaveFile = xStr + 'UPWPComponentProfilesValtx10SansLegend.'+FILEOUTTYPE
 
-    plt.savefig( SaveFolder + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
-    cmz_writing_fig(SaveFolder + SaveFile,8)
+    plt.savefig( SAVEFOLDER + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
+    cmz_writing_fig(SAVEFOLDER + SaveFile,8)
     plt.close()
 
 
@@ -2075,18 +2055,16 @@ for xstri in range(0, np.size(xStrs)):
     plt.plot([0,0],[0,MaxPlotAlt],'k',linewidth=0.5)
 
 
-    SaveFolder = VOLNAME+'/ThesisPlots/'
-
-    if not os.path.exists(SaveFolder):
-        os.makedirs(SaveFolder)
+    if not os.path.exists(SAVEFOLDER):
+        os.makedirs(SAVEFOLDER)
 
     if xStr == "x204":
         SaveFile = xStr + 'VPWPComponentProfilesValtx10RightLegend.'+FILEOUTTYPE
     else:
         SaveFile = xStr + 'VPWPComponentProfilesValtx10SansLegend.'+FILEOUTTYPE
 
-    plt.savefig( SaveFolder + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
-    cmz_writing_fig(SaveFolder + SaveFile,9)
+    plt.savefig( SAVEFOLDER + SaveFile, facecolor='w', bbox_inches='tight', dpi=300)
+    cmz_writing_fig(SAVEFOLDER + SaveFile,9)
     plt.close()
 
 
@@ -2307,17 +2285,13 @@ for xstri in range(np.size(TableXstrs)):
                 text = ax.text(xstri-0.28, vari-0.08, str(number), c='white', fontsize=thisFontSize)
                 text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
 
-# SAVE THE RMSE PLOT
-SaveFolder = VOLNAME+'/ThesisPlots/'
-
-if not os.path.exists(SaveFolder):
-    os.makedirs(SaveFolder)
+if not os.path.exists(SAVEFOLDER):
+    os.makedirs(SAVEFOLDER)
 SaveFile = 'TQUVHwindStoplightDiagramRMSE' + str(MinAlt) + 'mTo' + str(MaxAlt) + 'm.'+FILEOUTTYPE
 
-plt.savefig( SaveFolder + SaveFile, facecolor='w', bbox_inches='tight', pad_inches=0.5, dpi=300)
-cmz_writing_fig(SaveFolder + SaveFile,10)
+plt.savefig( SAVEFOLDER + SaveFile, facecolor='w', bbox_inches='tight', pad_inches=0.5, dpi=300)
+cmz_writing_fig(SAVEFOLDER + SaveFile,10)
 plt.close()
-# In[16]:
 
 
 #BIAS SECTION
@@ -2402,15 +2376,13 @@ for xstri in range(np.size(TableXstrs)):
                 text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
 
 # SAVE THE RMSE PLOT
-SaveFolder = VOLNAME+'/ThesisPlots/'
-
-if not os.path.exists(SaveFolder):
-    os.makedirs(SaveFolder)
+if not os.path.exists(SAVEFOLDER):
+    os.makedirs(SAVEFOLDER)
 
 SaveFile = 'TQUVHwindStoplightDiagramBIAS' + str(MinAlt) + 'mTo' + str(MaxAlt) + 'mV2.'+FILEOUTTYPE
 
-plt.savefig( SaveFolder + SaveFile, facecolor='w', bbox_inches='tight', pad_inches=0.5, dpi=300)
-cmz_writing_fig(SaveFolder + SaveFile,11)
+plt.savefig( SAVEFOLDER + SaveFile, facecolor='w', bbox_inches='tight', pad_inches=0.5, dpi=300)
+cmz_writing_fig(SAVEFOLDER + SaveFile,11)
 plt.close()
 # In[ ]:
 
