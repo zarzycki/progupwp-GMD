@@ -1,3 +1,4 @@
+ThesisPlots/
 *.ipynb_checkpoints/
 batch.sh.*
 *.out
