@@ -7,12 +7,12 @@
 
 date >> timing.txt
 
-RAWDATADIR=/storage/home/cmz5202/group/sag5649/EUREC4A_proc/
-BASEDIR=/storage/home/cmz5202/scratch/progupwp/
+RAWDATADIR=/Volumes/ZARZYCKI_FLASH/EUREC4A_proc/
+BASEDIR=/Volumes/ZARZYCKI_FLASH/progupwp/
 N=10
 configs=("x001" "x101" "x201" "x202" "x203" "x204" "x301" "x302" "x303" "x304")
 
-conda activate graap2
+conda activate graap
 
 # Loop over and process raw CAM data
 for i in "${configs[@]}" ; do
@@ -42,7 +42,7 @@ python OtherVariablePackager.py $BASEDIR $RAWDATADIR x101
 python OtherVariablePackager.py $BASEDIR $RAWDATADIR x204
 
 # Generate figures
-python IncludedFigureGenerator.py $BASEDIR $RAWDATADIR
+python IncludedFigureGenerator.py $BASEDIR $RAWDATADIR $PWD/ThesisPlots/
 
 date >> timing.txt
 echo "-------" >> timing.txt
