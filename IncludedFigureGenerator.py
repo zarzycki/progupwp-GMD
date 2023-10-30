@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
-
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
@@ -11,10 +9,9 @@ import datetime
 import os
 import matplotlib.patheffects as path_effects
 import sys
-
-#for loops with multiple ranges
 import itertools as it
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def cmz_print_filename(filename):
     #pass
@@ -34,6 +31,22 @@ def get_arg(index):
     else:
         return sys.argv[index]
 
+def oldstrings(lst):
+    lookup_table = {
+        'x001': 'ED-O',
+        'x101': 'PM-O',
+        'x201': 'X201',
+        'x202': 'X202',
+        'x203': 'X203',
+        'x204': 'PM-X',
+        'x301': 'X301',
+        'x302': 'X302',
+        'x303': 'X303',
+        'x304': 'ED-X',
+    }
+    return [lookup_table[item] for item in lst if item in lookup_table]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #CMZ adding general volume path
 VOLNAME=get_arg(1)+"/"
@@ -44,9 +57,6 @@ FILEOUTTYPE = 'pdf'  # png or pdf
 if not bool(VOLNAME):
     print("Need to specify VOLNAME")
     quit()
-
-# In[2]:
-
 
 #CMZ
 plot_fontsize=12
@@ -166,7 +176,8 @@ for xstri in range(0, len(xStrs)):
 
                 Uprofiles[totalsoundi,:]    = np.array(   CAMoutput.U[TimeInd,:,NcolInd])
                 UPWPprofiles[totalsoundi,:] = np.array(CAMoutput.upwp[TimeInd,:,NcolInd])
-
+                #Uprofiles[totalsoundi,:]    = np.array((   CAMoutput.U[TimeInd,:,NcolInd]**2.0 +    CAMoutput.V[TimeInd,:,NcolInd]**2.0)**0.5)
+                #UPWPprofiles[totalsoundi,:] = np.array((CAMoutput.upwp[TimeInd,:,NcolInd]**2.0 + CAMoutput.vpwp[TimeInd,:,NcolInd]**2.0)**0.5)
 
         # calculate effective eddy diffusivity profiles for all sounding columns
         KeffProfiles = np.full([NumTotalSoundings, NumILevs], np.nan)
@@ -191,7 +202,7 @@ print_break()
 # THIS BLOCK DOWNLOADS STORED PROFILES OF dU/dZ and K_eff and FINDS WHERE THERE ARE TRUE UPGRADIENT FLUXES
 
 #set the threshold for how large dU/dZ has to be to really consider an upgradient flux
-dUdZthreshold = 0.10 # [m/s per km]
+dUdZthreshold = 0.15 # [m/s per km]
 # and convert to SI units ( m/s / m)
 SIdUdZthreshold = 0.001 * dUdZthreshold
 
@@ -253,7 +264,7 @@ xmesh = xmesh.transpose()
 ymesh = ymesh.transpose()
 
 xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304', 'x101']
-chosenLabels = ['XXX001', 'XXX101', 'XXX201', 'XXX202', 'XXX203', 'XXX204', 'XXX301', 'XXX302', 'XXX303', 'XXX304', 'XXX101']
+chosenLabels = oldstrings(xStrs)
 
 for xstri in range(0, len(xStrs)):
     xStr = xStrs[xstri]
@@ -327,7 +338,6 @@ StartHourStr = '00'
 # list of the model runs
 # (don't use the last 3 when calculating turbulent errors since they are what the errors are relative too)
 xStrs = ['x001','x101','x201','x202','x203', 'x204','x301','x302','x303', 'x304']
-
 ChosenXstrs = ['x001','x101','x201','x202','x203', 'x204','x301','x302','x303', 'x304']
 
 corr_xstri = np.full(np.size(ChosenXstrs), -1)
@@ -493,6 +503,8 @@ if plot_cm1:
     cm1vg = [None] * cm1_num_files
     cm1ug = [None] * cm1_num_files
     cm1wprof = [None] * cm1_num_files
+    cm1dudz = [None] * cm1_num_files
+    cm1keff = [None] * cm1_num_files
 
     # Loop over files and load data into arrays
     for i, cm1file in enumerate(cm1files):
@@ -513,6 +525,26 @@ if plot_cm1:
         cm1vg[i] = cm1data.vg.values[0,:,0,0]
         cm1wprof[i] = cm1data.wprof.values[0,1::,0,0]
 
+        cm1nlev = len(cm1data.zh.values[:])
+
+        tmp1 = np.full([cm1nlev], np.nan)
+        tmp2 = np.full([cm1nlev], np.nan)
+
+        for levi in range(0,cm1nlev-1):
+            tmp = (cm1data.u.values[0,levi,0,0] - cm1data.u.values[0,levi+1,0,0]) / \
+                   (cm1data.zh.values[levi] - cm1data.zh.values[levi+1])
+
+            tmp1[levi+1] = tmp
+            tmp2[levi+1] = -1 * (cm1data.upwp.values[0,levi+1,0,0] / tmp)
+
+        cm1dudz[i] = tmp1
+        cm1keff[i] = tmp2
+
+        print("Possible CG fluxes from CM1?")
+        for i in range(cm1nlev):
+            if (np.abs(tmp1[i]) >= dUdZthreshold/1000. and tmp2[i] <= -1.0):
+                print(f'{cm1data.zh.values[i]:.6f} {tmp1[i]:.6f} {tmp2[i]:.6f}')
+
     # Create a dictionary to simplify plotting logic
     cm1_data_dict = {
         'U': cm1u,
@@ -524,6 +556,7 @@ if plot_cm1:
         'UpWp': cm1upwp,
         'VpWp': cm1vpwp
     }
+
 
 
 # THIS BLOCK PLOTS RMSE or MEAN PROFILES FOR MANY RUNS/LEADS ON ONE PLOT
@@ -545,13 +578,12 @@ for xx in range(arr_ncases):
     #CMZ edit this!
     if xx <= 3:
         ChosenXstrs  = ['x001', 'x101']
-        ChosenLabels = ['a', 'b']
     elif xx > 3 and xx <= 7:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
-        ChosenLabels = ['1', '2', '3', '4', '5', '6']
     else:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
-        ChosenLabels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'x3k04']
+
+    ChosenLabels = oldstrings(ChosenXstrs)
 
     print("DOING LOOP "+str(xx))
 
@@ -1089,13 +1121,12 @@ for xx in range(arr_ncases):
     #CMZ edit this!
     if xx <= 1:
         ChosenXstrs  = ['x001', 'x101']
-        ChosenLabels  = ['r', 'r']
     elif xx > 1 and xx <= 3:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
-        ChosenLabels  = ['a', 'a', 'a', 'a', 'a', 'a']
     else:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
-        ChosenLabels  = ['l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l']
+
+    ChosenLabels = oldstrings(ChosenXstrs)
 
     print("DOING LOOP "+str(xx))
 
@@ -1344,7 +1375,7 @@ TopAlt = 4000
 
 # LIST OF MODEL CONFIGURATIONS
 xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302' , 'x303', 'x304']
-chosenLabels = ['XXX001', 'XXX101', 'XXX201', 'XXX202' , 'XXX203', 'XXX204', 'XXX301', 'XXX302' , 'XXX303', 'XXX304']
+chosenLabels = oldstrings(xStrs)
 
 # WHICH LEAD DAY FORECAST?
 lead = 1
@@ -1876,7 +1907,7 @@ MaxPlotUPWP =  0.00026  # [m^2/s^3] maximum momentum flux tendency on the plots
 
 # model configurations to plot
 xStrs = ['x101', 'x204']
-ChosenLabels = ['EXP101', 'EXP204']
+ChosenLabels = oldstrings(xStrs)
 # xStrs = ['x101', 'x201', 'x202', 'x203', 'x204']
 
 
@@ -2002,7 +2033,7 @@ MaxPlotUPWP =  0.00026  # [m^2/s^3] maximum momentum flux tendency on the plots
 
 # model configurations to plot
 xStrs = ['x101', 'x204']
-ChosenLabels = ['EXP101', 'EXP204']
+ChosenLabels = oldstrings(xStrs)
 # xStrs = ['x101', 'x201', 'x202', 'x203', 'x204']
 
 
@@ -2131,7 +2162,7 @@ StoredXstrs = ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x
 
 # model runs to include on the stoplight diagrams (AND CORRESPONDING INDEX IN ALL STORED XSTRS)
 TableXstrs =  ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
-TableXstrsLabels =  ['001','101','201', '202' , '203', '204', '301', '302', '303', '304']
+TableXstrsLabels = oldstrings(TableXstrs)
 
 # CMZ, had to change these indices
 
