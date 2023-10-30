@@ -1,3 +1,5 @@
+.DS_store
+local_notes.sh
 ThesisPlots/
 *.ipynb_checkpoints/
 batch.sh.*
