@@ -253,6 +253,7 @@ xmesh = xmesh.transpose()
 ymesh = ymesh.transpose()
 
 xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304', 'x101']
+chosenLabels = ['XXX001', 'XXX101', 'XXX201', 'XXX202', 'XXX203', 'XXX204', 'XXX301', 'XXX302', 'XXX303', 'XXX304', 'XXX101']
 
 for xstri in range(0, len(xStrs)):
     xStr = xStrs[xstri]
@@ -296,7 +297,7 @@ for xstri in range(0, len(xStrs)):
     plt.text(Xposition,Yposition, PlotLabelText + ')',fontsize=21, color='k', weight='bold')
 
 
-    plt.title("Locations of Upgradient u'w' for " + xStr, fontsize=24)
+    plt.title("Locations of Upgradient u'w' for " + chosenLabels[xstri], fontsize=24)
 #     plt.xlabel('Sounding Index', fontsize=20)
     plt.ylabel('Estimated\nPressure Level\n[hPa]', fontsize=16)
 
@@ -544,10 +545,13 @@ for xx in range(arr_ncases):
     #CMZ edit this!
     if xx <= 3:
         ChosenXstrs  = ['x001', 'x101']
+        ChosenLabels = ['a', 'b']
     elif xx > 3 and xx <= 7:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+        ChosenLabels = ['1', '2', '3', '4', '5', '6']
     else:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
+        ChosenLabels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'x3k04']
 
     print("DOING LOOP "+str(xx))
 
@@ -796,16 +800,15 @@ for xx in range(arr_ncases):
 
                 # add a legend in the corresponding spot to user choice
                 if(LegendOption == 'left'):
-                    plt.legend(ChosenXstrs[0:LastXstr], bbox_to_anchor=(0.03, 0.9))
+                    plt.legend(ChosenLabels[0:LastXstr], bbox_to_anchor=(0.03, 0.9))
     #                 ax.legend(bbox_to_anchor=(0.03, 0.9))
 
                 elif(LegendOption == 'inside'):
-                    plt.legend(ChosenXstrs[0:LastXstr])
+                    plt.legend(ChosenLabels[0:LastXstr])
 
                 elif(LegendOption == 'right'):
-                    plt.legend(ChosenXstrs[0:LastXstr], bbox_to_anchor=(1.07, 0.9))
+                    plt.legend(ChosenLabels[0:LastXstr], bbox_to_anchor=(1.07, 0.9))
     #                 ax.legend(bbox_to_anchor=(1.07, 0.9))
-
 
                 # label with the corresponding variable name whether its a state or a turbulence variable
                 # only add a title if the user chooses it
@@ -886,14 +889,14 @@ for xx in range(arr_ncases):
 
                 # add a legend in the corresponding spot to user choice
                 if(LegendOption == 'left'):
-                    plt.legend(ChosenXstrs[0:LastXstr], bbox_to_anchor=(0.03, 0.9))
+                    plt.legend(ChosenLabels[0:LastXstr], bbox_to_anchor=(0.03, 0.9))
     #                 ax.legend(bbox_to_anchor=(0.03, 0.9))
 
                 elif(LegendOption == 'inside'):
-                    plt.legend(ChosenXstrs[0:LastXstr],loc='lower right')
+                    plt.legend(ChosenLabels[0:LastXstr],loc='lower right')
 
                 elif(LegendOption == 'right'):
-                    plt.legend(ChosenXstrs[0:LastXstr], bbox_to_anchor=(1.07, 0.9))
+                    plt.legend(ChosenLabels[0:LastXstr], bbox_to_anchor=(1.07, 0.9))
     #                 ax.legend(bbox_to_anchor=(1.07, 0.9))
 
 
@@ -1021,11 +1024,11 @@ for xx in range(arr_ncases):
                     special_strings = np.append(special_strings,'CM1')
 
                 if(LegendOption=='left'):
-                    ax.legend((np.append(special_strings, ChosenXstrs[0:LastXstr])), bbox_to_anchor=(0.03, 0.9))
+                    ax.legend((np.append(special_strings, ChosenLabels[0:LastXstr])), bbox_to_anchor=(0.03, 0.9))
                 elif(LegendOption=='inside'):
-                    plt.legend((np.append(special_strings, ChosenXstrs[0:LastXstr])),loc='lower right')
+                    plt.legend((np.append(special_strings, ChosenLabels[0:LastXstr])),loc='lower right')
                 elif(LegendOption=='right'):
-                    ax.legend((np.append(special_strings, ChosenXstrs[0:LastXstr])), bbox_to_anchor=(1.17, 0.9))
+                    ax.legend((np.append(special_strings, ChosenLabels[0:LastXstr])), bbox_to_anchor=(1.17, 0.9))
 
             elif (Var in TurbVars):
                 plt.xlabel('Mean ' + TurbVarLongNames[turbvari]  + ' [' + TurbVarUnitses[turbvari] + ']',fontsize=plot_fontsize)
@@ -1034,11 +1037,11 @@ for xx in range(arr_ncases):
                     plt.title(str(lead) + '-Day Lead Vertical Mean Profiles for ' + TurbVarLongNames[turbvari])
 
                 if(LegendOption=='left'):
-                    ax.legend(ChosenXstrs[0:LastXstr], bbox_to_anchor=(0.03, 0.9))
+                    ax.legend(ChosenLabels[0:LastXstr], bbox_to_anchor=(0.03, 0.9))
                 elif(LegendOption=='inside'):
-                    plt.legend(ChosenXstrs[0:LastXstr],loc='lower right')
+                    plt.legend(ChosenLabels[0:LastXstr],loc='lower right')
                 elif(LegendOption=='right'):
-                    ax.legend(ChosenXstrs[0:LastXstr], bbox_to_anchor=(1.17, 0.9))
+                    ax.legend(ChosenLabels[0:LastXstr], bbox_to_anchor=(1.17, 0.9))
 
 
             plt.ylabel('Altitude [km]',fontsize=plot_fontsize)
@@ -1086,10 +1089,13 @@ for xx in range(arr_ncases):
     #CMZ edit this!
     if xx <= 1:
         ChosenXstrs  = ['x001', 'x101']
+        ChosenLabels  = ['r', 'r']
     elif xx > 1 and xx <= 3:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+        ChosenLabels  = ['a', 'a', 'a', 'a', 'a', 'a']
     else:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
+        ChosenLabels  = ['l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l', 'l']
 
     print("DOING LOOP "+str(xx))
 
@@ -1338,6 +1344,7 @@ TopAlt = 4000
 
 # LIST OF MODEL CONFIGURATIONS
 xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302' , 'x303', 'x304']
+chosenLabels = ['XXX001', 'XXX101', 'XXX201', 'XXX202' , 'XXX203', 'XXX204', 'XXX301', 'XXX302' , 'XXX303', 'XXX304']
 
 # WHICH LEAD DAY FORECAST?
 lead = 1
@@ -1540,7 +1547,7 @@ for xstri in range(0, np.size(xStrs)):
         if (TimeMode == 'LT'):
              plt.xlabel('Time of Day [Local Time Hour]')
         plt.ylabel('Altitude [km]')
-        plt.title(VarLongName + ' Bias in ' + xStrs[xstri])
+        plt.title(VarLongName + ' Bias in ' + chosenLabels[xstri])
 
 
         # SAVE EACH PLOT AS A FILE
@@ -1869,6 +1876,7 @@ MaxPlotUPWP =  0.00026  # [m^2/s^3] maximum momentum flux tendency on the plots
 
 # model configurations to plot
 xStrs = ['x101', 'x204']
+ChosenLabels = ['EXP101', 'EXP204']
 # xStrs = ['x101', 'x201', 'x202', 'x203', 'x204']
 
 
@@ -1917,7 +1925,7 @@ for xstri in range(0, np.size(xStrs)):
         ax.legend(bbox_to_anchor=(1.52, 0.9))
     #    plt.legend()
 
-    plt.title("Domain and Time Mean u'w' Components for " + xStr)
+    plt.title("Domain and Time Mean u'w' Components for " + ChosenLabels[xstri])
 
     plt.xlabel(" u'w' Budget Terms [m\u00b2/s\u00b3]",fontsize=plot_fontsize)
     plt.ylabel('Altitude [km]',fontsize=plot_fontsize)
@@ -1994,6 +2002,7 @@ MaxPlotUPWP =  0.00026  # [m^2/s^3] maximum momentum flux tendency on the plots
 
 # model configurations to plot
 xStrs = ['x101', 'x204']
+ChosenLabels = ['EXP101', 'EXP204']
 # xStrs = ['x101', 'x201', 'x202', 'x203', 'x204']
 
 
@@ -2042,7 +2051,7 @@ for xstri in range(0, np.size(xStrs)):
         ax.legend(bbox_to_anchor=(1.52, 0.9))
     #    plt.legend()
 
-    plt.title("Domain and Time Mean v'w' Components for " + xStr)
+    plt.title("Domain and Time Mean v'w' Components for " + ChosenLabels[xstri])
 
     plt.xlabel(" v'w' Budget Terms [m\u00b2/s\u00b3]",fontsize=plot_fontsize)
     plt.ylabel('Altitude [km]',fontsize=plot_fontsize)
@@ -2122,6 +2131,8 @@ StoredXstrs = ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x
 
 # model runs to include on the stoplight diagrams (AND CORRESPONDING INDEX IN ALL STORED XSTRS)
 TableXstrs =  ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
+TableXstrsLabels =  ['001','101','201', '202' , '203', '204', '301', '302', '303', '304']
+
 # CMZ, had to change these indices
 
 TableXstris = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -2255,12 +2266,12 @@ ax.set_xlabel('CAM Configuration', fontsize=22)
 # tick labels
 ax.set_xticks(np.linspace(0, len(TableXstrs)-1, len(TableXstrs)) )
 ax.set_yticks(np.linspace(0, len(TableVars) -1, len(TableVars)) )
-ax.set_xticklabels(TableXstrs, fontsize=18) #, rotation=45)
+ax.set_xticklabels(TableXstrsLabels, fontsize=18) #, rotation=45)
 ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
-cbar.set_label('RMSE Relative to x001', fontsize=16)
+cbar.set_label('RMSE Relative to REF', fontsize=16)
 cbar.set_ticks([-0.15, 0.0, 0.15])
 cbar.set_ticklabels(['15% Decrease', 'Same', '15% Increase'])
 cbar.ax.tick_params(labelsize=13)
@@ -2345,12 +2356,12 @@ ax.set_xlabel('CAM Configuration', fontsize=22)
 # tick labels
 ax.set_xticks(np.linspace(0, len(TableXstrs)-1, len(TableXstrs)) )
 ax.set_yticks(np.linspace(0, len(TableVars) -1, len(TableVars)) )
-ax.set_xticklabels(TableXstrs, fontsize=18) #, rotation=45)
+ax.set_xticklabels(TableXstrsLabels, fontsize=18) #, rotation=45)
 ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
-cbar.set_label('Absolute Bias Relative to x001', fontsize=16)
+cbar.set_label('Absolute Bias Relative to REF', fontsize=16)
 cbar.set_ticks([-1.00, 0.0, 1.00])
 cbar.set_ticklabels(['100% Decrease', 'Same', '100% Increase'])
 cbar.ax.tick_params(labelsize=13)
