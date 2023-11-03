@@ -58,8 +58,22 @@ if not bool(VOLNAME):
     print("Need to specify VOLNAME")
     quit()
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# MASTER SETTINGS
+
 #CMZ
 plot_fontsize=12
+
+NONESTR='-'
+PlotxStrDashes = [':',(0, (5, 1)),NONESTR,NONESTR,NONESTR,(5, (10, 3)),NONESTR,NONESTR,NONESTR, (0, (3, 1, 1, 1, 1, 1))]
+
+# colours associated with each of the model runs
+PlotxStrColours = [ [0.9,0.0,0.0],
+                    [0.0,0.5,0.0], \
+                    [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
+                    [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9],  [0.5, 1.0, 1.0] ]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # THIS BLOCK CREATES 3 ARRAYS OF LENGTH 1546 STORING THE CAM INDICES OF DATE/ TIME/ COLUMN FOR EACH SOUDNING
 
@@ -162,6 +176,7 @@ for xstri in range(0, len(xStrs)):
 
                 Uprofiles[totalsoundi,:]    = np.array(   CAMoutput.U[TimeInd,:,NcolInd])
                 UPWPprofiles[totalsoundi,:] = np.array(CAMoutput.upwp[TimeInd,:,NcolInd])
+
                 #Uprofiles[totalsoundi,:]    = np.array((   CAMoutput.U[TimeInd,:,NcolInd]**2.0 +    CAMoutput.V[TimeInd,:,NcolInd]**2.0)**0.5)
                 #UPWPprofiles[totalsoundi,:] = np.array((CAMoutput.upwp[TimeInd,:,NcolInd]**2.0 + CAMoutput.vpwp[TimeInd,:,NcolInd]**2.0)**0.5)
 
@@ -192,13 +207,16 @@ dUdZthreshold = 0.15 # [m/s per km]
 # and convert to SI units ( m/s / m)
 SIdUdZthreshold = 0.001 * dUdZthreshold
 
-
 # where the profiles of dU/dZ and K_eff are stored
 #DownloadPath = VOLNAME+'/VARIABLES/OriginalSoundingdProfiles/'
 DownloadPath = VOLNAME+'/ThesisVariables/METEO600'
 
+masked_keff_arr = np.full((len(xStrs), NumTotalSoundings, NumILevs), np.nan)
+print(masked_keff_arr.shape)
+
 # retrieve these profiles for each CAM configuration and calculate where there are upgradient fluxes
 # and where they occur only when dU/dZ is very small
+keff_counter=0
 for xStr in xStrs:
 
     exec("dUdZprofiles" + xStr + " = " + \
@@ -220,20 +238,83 @@ for xStr in xStrs:
     print(xStr)
     exec("cmz_dudz = np.abs(dUdZprofiles" + xStr +")")
     exec("cmz_dual = DualMap" + xStr)
-    actualvals = np.where(cmz_dual == 2,cmz_dudz,1000000.)
-    print(np.nanmin(actualvals))
-
+    exec("cmz_keff = KeffProfiles" + xStr)
+    valid_shears = np.where(cmz_dual == 2,cmz_dudz,1000000.)
+    print(np.nanmin(valid_shears))
     # If 100000. that means there are no "true" Keff < 0 lines.
+
+    masked_keff_arr[keff_counter,:,:] = np.where(cmz_dual != 1,cmz_keff,np.nan)
+    keff_counter = keff_counter + 1
+
+
+# where do you want the top and bottoms of the plots in terms of pressure?
+TopP = 600 # [hPa]
+BotP = 1000 # [hPa]
+
+keff_inds = [0, 1, 9, 5]
+
+iLevVals = np.array(dummyCAMoutput.ilev)
+pressure_mask = (iLevVals > TopP) & (iLevVals < BotP)
+masked_keff_arr = masked_keff_arr[:, :, pressure_mask]
+
+# Create a figure
+plt.figure(figsize=(12, 7))
+
+legend_labels = []  # Initialize an empty list to hold legend labels
+
+# Flatten the last two dimensions and plot histograms for each of the specified indices
+for i in keff_inds:
+    # Flatten the last two dimensions
+    sub_values = masked_keff_arr[i].flatten()
+    # Create a mask for non-NaN values
+    non_nan_mask = ~np.isnan(sub_values)
+    # Apply the mask to get non-NaN values
+    non_nan_values = sub_values[non_nan_mask]
+    # Calculate weights for the non-NaN values only once
+    sub_weights = np.ones_like(non_nan_values) / len(non_nan_values)
+
+    # Plot histogram with label
+    plt.hist(non_nan_values, bins=40, weights = sub_weights, linewidth=2.0, linestyle=PlotxStrDashes[i], label=f'Index {i}', histtype='step', color = PlotxStrColours[i], range=(-20, 60))
+
+    # Calculate and print the percentage of values < 0
+    percentage_below_zero = np.sum(non_nan_values < 0) / len(non_nan_values) * 100
+
+    # Create the label with the percentage for the legend
+    label_with_percentage = f"{oldstrings([xStrs[i]])[0]}: ({percentage_below_zero:.1f}%)"
+    legend_labels.append(label_with_percentage)  # Add to the list of legend labels
+
+#Reference line
+plt.axvline(x=0, color='black', linestyle='-', linewidth=1)
+
+# Add legend to the plot to differentiate the indices
+plt.legend(legend_labels,fontsize=20)
+
+# Specify your desired font sizes
+plt.title('Binned effective eddy diffusivities between '+str(TopP)+' and '+str(BotP)+' hPa',fontsize=18)
+
+plt.xlabel('Effective eddy diffusivity (m\u00b2/s)',fontsize=16)
+plt.ylabel('Frequency',fontsize=16)
+
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+
+plt.xlim(-20, 60)
+plt.ylim(0, 0.1)
+
+if not os.path.exists(SAVEFOLDER):
+    os.makedirs(SAVEFOLDER)
+
+savefigname=SAVEFOLDER + 'keff_histograms.'+FILEOUTTYPE
+plt.savefig(savefigname, \
+                     facecolor='w',bbox_inches='tight')
+cmz_writing_fig(savefigname,0)
+plt.close()
 
 print_break()
 
 # THIS BLOCK ACTUALLY CREATES PLOTS OF WHERE UPGRADIENT FLUXES OCCUR
 # pressure level limits for the plot
 
-
-# where do you want the top and bottoms of the plots in terms of pressure?
-TopP = 600 # [hPa]
-BotP = 1000 # [hPa]
 
 #CMZ
 my_dpi = 60  # 600 for publication
@@ -477,6 +558,7 @@ if plot_cm1:
     cm1_num_files = len(cm1files)
     cm1u = [None] * cm1_num_files
     cm1z = [None] * cm1_num_files
+    cm1prs = [None] * cm1_num_files
     cm1v = [None] * cm1_num_files
     cm1t = [None] * cm1_num_files
     cm1th = [None] * cm1_num_files
@@ -491,7 +573,10 @@ if plot_cm1:
     cm1keff = [None] * cm1_num_files
     cm1qcfrac = [None] * cm1_num_files
     cm1qc = [None] * cm1_num_files
+    cm1upup = [None] * cm1_num_files
+    cm1vpvp = [None] * cm1_num_files
     cm1wpwp = [None] * cm1_num_files
+    cm1tke = [None] * cm1_num_files
 
     # Loop over files and load data into arrays
     for i, cm1file in enumerate(cm1files):
@@ -500,6 +585,7 @@ if plot_cm1:
         cm1u[i] = cm1data.u.values[0,:,0,0]
         cm1z[i] = cm1data.zh.values[:]
         cm1z[i] = cm1z[i] / 1000.
+        cm1prs[i] = cm1data.prs.values[0,:,0,0]
         cm1v[i] = cm1data.v.values[0,:,0,0]
         cm1t[i] = cm1data.t.values[0,:,0,0]
         cm1th[i] = cm1data.th.values[0,:,0,0]
@@ -514,7 +600,10 @@ if plot_cm1:
         cm1qcfrac[i] = cm1data.qcfrac.values[0,:,0,0]
         cm1qc[i] = cm1data.qc.values[0,:,0,0]
         cm1qc[i] = cm1qc[i]
+        cm1upup[i] = cm1data.upup.values[0,:,0,0]
+        cm1vpvp[i] = cm1data.vpvp.values[0,:,0,0]
         cm1wpwp[i] = cm1data.wpwp.values[0,:,0,0]
+        cm1tke[i] = 0.5*(cm1data.upup.values[0,:,0,0] + cm1data.vpvp.values[0,:,0,0] + cm1data.wpwp.values[0,:,0,0])
 
         cm1nlev = len(cm1data.zh.values[:])
 
@@ -534,7 +623,7 @@ if plot_cm1:
         print("Possible CG fluxes from CM1?")
         for i in range(cm1nlev):
             if (np.abs(tmp1[i]) >= dUdZthreshold/1000. and tmp2[i] <= -1.0):
-                print(f'{cm1data.zh.values[i]:.6f} {tmp1[i]:.6f} {tmp2[i]:.6f}')
+                print(f'{cm1data.zh.values[i]:.6f} {cm1data.prs.values[0,i,0,0]:.6f} {tmp1[i]:.6f} {tmp2[i]:.6f}')
 
     # Create a dictionary to simplify plotting logic
     cm1_data_dict = {
@@ -546,9 +635,13 @@ if plot_cm1:
         'theta': cm1th,
         'UpWp': cm1upwp,
         'VpWp': cm1vpwp,
+        'Up2': cm1upup,
+        'Vp2': cm1vpvp,
         'Wp2': cm1wpwp,
         'CLDLIQ': cm1qc,
-        'CLOUD': cm1qcfrac
+        'CLOUD': cm1qcfrac,
+        'EM': cm1tke,
+        'PMID': cm1prs
     }
 
 # THIS BLOCK PLOTS RMSE or MEAN PROFILES FOR MANY RUNS/LEADS ON ONE PLOT
@@ -556,8 +649,7 @@ if plot_cm1:
 # THIS BLOCK NEEDS TO BE REWRITTEN TO BETTER ACCOMMODATE EASY SWITCHING BETWEEN VARS AND TURBVARS
 
 # From https://matplotlib.org/devdocs/gallery/lines_bars_and_markers/linestyles.html
-NONESTR='-'
-PlotxStrDashes = [':',(0, (5, 1)),NONESTR,NONESTR,NONESTR,(5, (10, 3)),NONESTR,NONESTR,NONESTR, (0, (3, 1, 1, 1, 1, 1))]
+
 
 # Variables to choose from
 Vars     =  [ 'T' , 'Q', 'U', 'V', 'Hwind', 'theta']
@@ -568,12 +660,6 @@ TurbVars = []
 
 # KEEP THIS LIST AS ALL XSTRINGS
 xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
-
-# colours associated with each of the model runs
-PlotxStrColours = [ [0.9,0.0,0.0],
-                    [0.0,0.5,0.0], \
-                    [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
-                    [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9],  [0.5, 1.0, 1.0] ]
 
 # USER MODIFICATION SECTION!!!
 # lowest and highest altitudes you want to plot for, and index in "alts" corresponding to those altitudes
@@ -1120,29 +1206,21 @@ for xx in range(arr_ncases):
 
     print("DOING LOOP "+str(xx))
 
-    Vars = [] #['ThetaL']
-    TurbVars = ['UpWp', 'VpWp', 'CLOUD','CLDLIQ','Wp2','LSCALE'] #,'Wp2', 'TAU_zm', 'EM', 'LSCALE']
+    Vars = []
+    TurbVars         =  ['UpWp', 'VpWp', 'Wp2', \
+                         'TAU_zm', 'EM', 'LSCALE','CLOUD','CLDLIQ']
 
-    TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'percent','-','-','-'] #, 'm\u00b2/s\u00b2', \
-                         # 's', 'm\u00b2/s\u00b2',       'm']
+    TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance', \
+                        'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
+                        'Cloud fraction', 'Cloud liquid']
 
-    # store the x-limits in the plots of each variable
+    TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', \
+                         's', 'm\u00b2/s\u00b2',       'm','percent','kg/kg']
 
-    #            #[   T,   Q,    U,    V,   H]
-    # RMSExmins = [ 0.0, 0.0, 1.25, 1.25, 0.0]
-    # RMSExmaxs = [ 4.0, 4.0, 3.25, 3.25, 4.0]
-
-    # BIASxmins = [-2.0,-2.0, -1.7, -1.7,-2.0]
-    # BIASxmaxs = [ 2.0, 2.0,  1.7,  1.7, 2.0]
-
-    MEANxmins = [-0.03,-0.025,0.0,0.0,0.0,0]
-    MEANxmaxs = [ 0.09, 0.025,0.25,2.5/100000.,0.2,800]
-
-    # MEANxmins = [298]
-    # MEANxmaxs = [311]
+    MEANxmins = [-0.03, -0.025, 0.0,      0,   0,   0, 0.0,      0.0]
+    MEANxmaxs = [ 0.09,  0.025, 0.25,  3000, 0.5, 800, 0.2, 0.000025]
 
     thickness = 1.8 # set line thicknesses in plot
-
 
     # calculate the index in "alts" corresponding to this altitude
     maxAlti = int( (maxAlt / 10) + 1 )
@@ -1182,22 +1260,12 @@ for xx in range(arr_ncases):
     #     set the x-limits on the plots
 
         if (Var in TurbVars):
-            RMSExmin = RMSExmins[turbvari]
-            RMSExmax = RMSExmaxs[turbvari]
-            BIASxmin = BIASxmins[turbvari]
-            BIASxmax = BIASxmaxs[turbvari]
             MEANxmin = MEANxmins[turbvari]
             MEANxmax = MEANxmaxs[turbvari]
 
         if (Var in Vars):
-            RMSExmin = RMSExmins[vari]
-            RMSExmax = RMSExmaxs[vari]
-            BIASxmin = BIASxmins[vari]
-            BIASxmax = BIASxmaxs[vari]
             MEANxmin = MEANxmins[vari]
             MEANxmax = MEANxmaxs[vari]
-
-
 
         # count the number of nudged runs included by the user
         NumOfNudgedRuns = 0
