@@ -122,29 +122,15 @@ NumNcols = np.size(dummyCAMoutput.ncol)
 NumLevs  = np.size(dummyCAMoutput.lev)
 NumILevs = np.size(dummyCAMoutput.ilev)
 
-
 # create empty arrays for all sounding profiles of wind, height, and momentum flux for each sounding column
 Zprofiles     = np.full([NumTotalSoundings,  NumLevs], np.nan)
 
 Uprofiles     = np.full([NumTotalSoundings,  NumLevs], np.nan)
 UPWPprofiles  = np.full([NumTotalSoundings, NumILevs], np.nan)
 
-
-
 xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
-
-# In[17]:
-
-
-# # THIS BLOCK ONLY NEEDS TO BE RUN IF THESE STORED VARIABLES DO NOT ALREADY EXIST !!!!!
-# # THIS BLOCK ONLY NEEDS TO BE RUN IF THESE STORED VARIABLES DO NOT ALREADY EXIST !!!!!
-# # THIS BLOCK ONLY NEEDS TO BE RUN IF THESE STORED VARIABLES DO NOT ALREADY EXIST !!!!!
-# # THIS BLOCK ONLY NEEDS TO BE RUN IF THESE STORED VARIABLES DO NOT ALREADY EXIST !!!!!
-# # THIS BLOCK ONLY NEEDS TO BE RUN IF THESE STORED VARIABLES DO NOT ALREADY EXIST !!!!!
-
 # # THIS BLOCK CREATES 1546 x NumLev Arrays for CAM U wind, Z height, and U'W' momentum flux for all soundings
-
 for xstri in range(0, len(xStrs)):
 
     xStr = xStrs[xstri]
@@ -236,6 +222,7 @@ for xStr in xStrs:
     exec("cmz_dual = DualMap" + xStr)
     actualvals = np.where(cmz_dual == 2,cmz_dudz,1000000.)
     print(np.nanmin(actualvals))
+
     # If 100000. that means there are no "true" Keff < 0 lines.
 
 print_break()
@@ -263,7 +250,7 @@ xmesh, ymesh = np.meshgrid(xvals, iLevVals)
 xmesh = xmesh.transpose()
 ymesh = ymesh.transpose()
 
-xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304', 'x101']
+xStrs = ['x001', 'x101', 'x101', 'x304', 'x204']
 chosenLabels = oldstrings(xStrs)
 
 for xstri in range(0, len(xStrs)):
@@ -284,12 +271,8 @@ for xstri in range(0, len(xStrs)):
     plt.ylim([BotP,TopP])
 
     # label the plot in the top left corner a), b), or c) for figures in LaTeX
-    FigLabels = ['a', 'b', 'c', \
-                 'd', 'e', 'b', \
-                 'g', 'h', 'i', \
-                 'j', 'k', 'l', \
-                 'm', 'n', 'o', \
-                 'p', 'q', 'a'  ]
+    FigLabels = ['a', 'b', 'a', \
+                 'b', 'c', 'X' ]
 
 #     if   (xStr == 'U'):
 #         PlotLabelText = FigLabels[0 + xstri*3] + ')'
@@ -300,7 +283,7 @@ for xstri in range(0, len(xStrs)):
 #     else:
 #         PlotLabelText = ''
 
-    PlotLabelText = FigLabels[xstri-1]
+    PlotLabelText = FigLabels[xstri]
 
     # place the label at sounding 6 and 600 hPa
     Xposition = 6
@@ -328,8 +311,8 @@ for xstri in range(0, len(xStrs)):
 
 print_break()
 
+print(">>>>>> LOADING RMSE, BIASES, and MEANS from model runs <<<<<<<<")
 # THIS BLOCK PACKAGES ALL OF THE RMSE DATA SAVED IN .NPY FILES INTO ARRAYS CONVENIENT FOR PLOTTING
-
 
 # Which Hour Blocks are you retrieving RMSEs for?
 HourBlockLength = 24
@@ -338,7 +321,9 @@ StartHourStr = '00'
 # list of the model runs
 # (don't use the last 3 when calculating turbulent errors since they are what the errors are relative too)
 xStrs = ['x001','x101','x201','x202','x203', 'x204','x301','x302','x303', 'x304']
-ChosenXstrs = ['x001','x101','x201','x202','x203', 'x204','x301','x302','x303', 'x304']
+
+## CMZ, I think we want to load all of these
+ChosenXstrs = xStrs
 
 corr_xstri = np.full(np.size(ChosenXstrs), -1)
 for chosexstri in range(0, np.size(ChosenXstrs)):
@@ -348,7 +333,6 @@ for chosexstri in range(0, np.size(ChosenXstrs)):
 
 
 # Retrieve altitudes to plot against
-
 
 dummySoundingData = xr.open_dataset(RAWDATA+'/DATA/StephanSoundings/OriginalDownloads/' + \
                     'EUREC4A_Atalante_Vaisala-RS_L2_v3.0.0.nc', engine='netcdf4')
@@ -366,17 +350,6 @@ VarLongNames = ['Temperature', 'Mixing Ratio', 'U-Wind Velocity', 'V-Wind Veloci
 
 VarUnitses   = [          'K',         'g/kg',             'm/s',             'm/s', \
                         'm/s',            'K']
-
-
-TurbVars         =  ['UpWp', 'VpWp', 'Wp2', \
-                     'TAU_zm', 'EM', 'LSCALE']
-
-TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance', \
-                    'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length' ]
-
-TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', \
-                     's', 'm\u00b2/s\u00b2',       'm']
-
 
 # LOOPS FOR STATE VARIABLES
 for vari in range(0, np.size(Vars)):
@@ -428,8 +401,19 @@ for vari in range(0, np.size(Vars)):
             exec(Var + "_BiasesArray[xstri, lead, :] = BiasTempArray[0,:]")
             exec(Var +  "_MeansArray[xstri, lead, :] = MeanTempArray[0,:]")
 
+print("<<<<<< DONE RMSE, BIASES, and MEANS from model runs >>>>>>>")
 
+print(">>>>>> READING RMSE, BIASES, and MEANS for turbulence variables <<<<<<<<")
 
+TurbVars         =  ['UpWp', 'VpWp', 'Wp2', \
+                     'TAU_zm', 'EM', 'LSCALE','CLOUD','CLDLIQ']
+
+TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance', \
+                    'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
+                    'Cloud fraction', 'Cloud liquid']
+
+TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', \
+                     's', 'm\u00b2/s\u00b2',       'm','percent','percent']
 
 # LOOPS FOR TURBULENCE VARIABLES
 for vari in range(0, np.size(TurbVars)):
@@ -440,7 +424,6 @@ for vari in range(0, np.size(TurbVars)):
     #CMZ exec(Var +  "_RMSEsArray = np.full( [np.size(xStrs), 3, np.size(alts)], np.nan )" )
     #CMZ exec(Var + "_BiasesArray = np.full( [np.size(xStrs), 3, np.size(alts)], np.nan )" )
     exec(Var +  "_MeansArray = np.full( [np.size(xStrs), 3, np.size(alts)], np.nan )" )
-
 
     for xstri in range(0, np.size(xStrs)): # only non-nudged runs for turbulent variables
         xStr = xStrs[xstri]
@@ -480,6 +463,7 @@ for vari in range(0, np.size(TurbVars)):
             #CMZ exec(Var + "_BiasesArray[xstri, lead, :] = BiasTempArray[0,:]")
             exec(Var +  "_MeansArray[xstri, lead, :] = MeanTempArray[0,:]")
 
+print("<<<<<<< DONE RMSE, BIASES, and MEANS for turbulence variables >>>>>>>>>")
 
 print_break()
 
@@ -505,6 +489,9 @@ if plot_cm1:
     cm1wprof = [None] * cm1_num_files
     cm1dudz = [None] * cm1_num_files
     cm1keff = [None] * cm1_num_files
+    cm1qcfrac = [None] * cm1_num_files
+    cm1qc = [None] * cm1_num_files
+    cm1wpwp = [None] * cm1_num_files
 
     # Loop over files and load data into arrays
     for i, cm1file in enumerate(cm1files):
@@ -524,6 +511,10 @@ if plot_cm1:
         cm1ug[i] = cm1data.ug.values[0,:,0,0]
         cm1vg[i] = cm1data.vg.values[0,:,0,0]
         cm1wprof[i] = cm1data.wprof.values[0,1::,0,0]
+        cm1qcfrac[i] = cm1data.qcfrac.values[0,:,0,0]
+        cm1qc[i] = cm1data.qc.values[0,:,0,0]
+        cm1qc[i] = cm1qc[i]
+        cm1wpwp[i] = cm1data.wpwp.values[0,:,0,0]
 
         cm1nlev = len(cm1data.zh.values[:])
 
@@ -554,23 +545,42 @@ if plot_cm1:
         'Hwind': cm1wsp,
         'theta': cm1th,
         'UpWp': cm1upwp,
-        'VpWp': cm1vpwp
+        'VpWp': cm1vpwp,
+        'Wp2': cm1wpwp,
+        'CLDLIQ': cm1qc,
+        'CLOUD': cm1qcfrac
     }
-
-
 
 # THIS BLOCK PLOTS RMSE or MEAN PROFILES FOR MANY RUNS/LEADS ON ONE PLOT
 
 # THIS BLOCK NEEDS TO BE REWRITTEN TO BETTER ACCOMMODATE EASY SWITCHING BETWEEN VARS AND TURBVARS
 
-# USER MODIFICATION SECTION!!!
-# USER MODIFICATION SECTION!!!
+# From https://matplotlib.org/devdocs/gallery/lines_bars_and_markers/linestyles.html
+NONESTR='-'
+PlotxStrDashes = [':',(0, (5, 1)),NONESTR,NONESTR,NONESTR,(5, (10, 3)),NONESTR,NONESTR,NONESTR, (0, (3, 1, 1, 1, 1, 1))]
+
+# Variables to choose from
+Vars     =  [ 'T' , 'Q', 'U', 'V', 'Hwind', 'theta']
+# Vars     =  ['U', 'V', 'Hwind']
+# Vars = []
+#TurbVars =  ['UpWp', 'VpWp', 'Wp2', 'TAU_zm', 'EM', 'LSCALE']
+TurbVars = []
+
+# KEEP THIS LIST AS ALL XSTRINGS
+xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
+
+# colours associated with each of the model runs
+PlotxStrColours = [ [0.9,0.0,0.0],
+                    [0.0,0.5,0.0], \
+                    [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
+                    [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9],  [0.5, 1.0, 1.0] ]
+
 # USER MODIFICATION SECTION!!!
 # lowest and highest altitudes you want to plot for, and index in "alts" corresponding to those altitudes
 arr_minAlt = [60,60,60,60,  60,60,60,60,  60,60,60,60]
 arr_maxAlt = [2500,2500,5000,5000,  2500,2500,17000,17000,  2500,2500,17000,17000]
 arr_titleOption = ['no','no','no','no',  'no','no','no','no',  'no','no','no','no']
-arr_legendOption = ['no','inside','no',  'inside','no','inside','no','inside',  'inside','no','inside','no','inside']
+arr_legendOption = ['no','inside','no','inside',  'no','inside','no','inside',  'inside','no','inside','no','inside']
 arr_ncases = 12
 
 for xx in range(arr_ncases):
@@ -579,9 +589,9 @@ for xx in range(arr_ncases):
     if xx <= 3:
         ChosenXstrs  = ['x001', 'x101']
     elif xx > 3 and xx <= 7:
-        ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
-    else:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
+    else:
+        ChosenXstrs  = ['x001', 'x101', 'x304', 'x204']
 
     ChosenLabels = oldstrings(ChosenXstrs)
 
@@ -611,7 +621,6 @@ for xx in range(arr_ncases):
     else:
         print("need a 'no' or 'yes' for Title Option")
 
-
     if (LegendOption == 'no'):
         AnnoStyle = AnnoStyle + 'SansLegend'
 
@@ -625,24 +634,6 @@ for xx in range(arr_ncases):
         AnnoStyle = AnnoStyle + 'RightLegend'
     else:
         print("need a 'no' or 'left' or 'inside' or 'right' for Legend Option")
-
-
-    # Variables to choose from
-    Vars     =  [ 'T' , 'Q', 'U', 'V', 'Hwind', 'theta']
-    # Vars     =  ['U', 'V', 'Hwind']
-    # Vars = []
-    #TurbVars =  ['UpWp', 'VpWp', 'Wp2', 'TAU_zm', 'EM', 'LSCALE']
-    TurbVars = []
-
-
-    # KEEP THIS LIST AS ALL XSTRINGS
-    xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
-
-    # colours associated with each of the model runs
-    PlotxStrColours = [ [0.9,0.0,0.0],
-                        [0.0,0.5,0.0], \
-                        [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
-                        [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9], [0.4,0.5,0.5] ]
 
     # store the x-limits in the plots of each variable
 
@@ -817,7 +808,7 @@ for xx in range(arr_ncases):
                                  linewidth=thickness, linestyle=':', label=xStr)
                     else:
                         plt.plot(RMSEsToPlot[minAlti:maxAlti], AltsToPlot, color = PlotxStrColours[xstri], \
-                                 linewidth=thickness, linestyle='--', label=xStr)
+                                 linewidth=thickness, linestyle=PlotxStrDashes[xstri], label=xStr)
 
                     # keep track of the largest RMSE value on the plot
                     thisRMSEmax = np.nanmax(RMSEsToPlot)
@@ -905,7 +896,7 @@ for xx in range(arr_ncases):
                                  linewidth=thickness, linestyle=':', label=xStr)
                     else:
                         plt.plot(BiasesToPlot[minAlti:maxAlti], AltsToPlot, color = PlotxStrColours[xstri], \
-                                 linewidth=thickness, linestyle='--', label=xStr)
+                                 linewidth=thickness, linestyle=PlotxStrDashes[xstri], label=xStr)
 
                     # keep track of the largest RMSE value on the plot
                     thisBiasMax = np.nanmax(np.abs(BiasesToPlot))
@@ -1033,7 +1024,7 @@ for xx in range(arr_ncases):
                     plt.plot(MeansToPlot[minAlti:maxAlti], AltsToPlot, linestyle=':', \
                              color = PlotxStrColours[xstri], linewidth=thickness, label=xStr)
                 else:
-                    plt.plot(MeansToPlot[minAlti:maxAlti], AltsToPlot, linestyle='--', \
+                    plt.plot(MeansToPlot[minAlti:maxAlti], AltsToPlot, linestyle=PlotxStrDashes[xstri], \
                              color = PlotxStrColours[xstri], linewidth=thickness, label=xStr)
 
             # plot accessories
@@ -1099,7 +1090,6 @@ for xx in range(arr_ncases):
             cmz_writing_fig(savefigname,4)
             plt.close()
 
-
 print_break()
 
 
@@ -1122,24 +1112,19 @@ for xx in range(arr_ncases):
     if xx <= 1:
         ChosenXstrs  = ['x001', 'x101']
     elif xx > 1 and xx <= 3:
-        ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
-    else:
         ChosenXstrs  = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
+    else:
+        ChosenXstrs  = ['x001', 'x101', 'x304', 'x204']
 
     ChosenLabels = oldstrings(ChosenXstrs)
 
     print("DOING LOOP "+str(xx))
 
     Vars = [] #['ThetaL']
-    TurbVars = ['UpWp', 'VpWp'] #,'Wp2', 'TAU_zm', 'EM', 'LSCALE']
+    TurbVars = ['UpWp', 'VpWp', 'CLOUD','CLDLIQ','Wp2','LSCALE'] #,'Wp2', 'TAU_zm', 'EM', 'LSCALE']
 
-    TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2'] #, 'm\u00b2/s\u00b2', \
+    TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'percent','-','-','-'] #, 'm\u00b2/s\u00b2', \
                          # 's', 'm\u00b2/s\u00b2',       'm']
-
-    # colours associated with each of the model runs
-    PlotxStrColours = [ [0.9,0.0,0.0], [0.0,0.5,0.0], \
-                        [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
-                        [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9], [0.4,0.5,0.5] ]
 
     # store the x-limits in the plots of each variable
 
@@ -1150,8 +1135,8 @@ for xx in range(arr_ncases):
     # BIASxmins = [-2.0,-2.0, -1.7, -1.7,-2.0]
     # BIASxmaxs = [ 2.0, 2.0,  1.7,  1.7, 2.0]
 
-    MEANxmins = [-0.03,-0.025]
-    MEANxmaxs = [ 0.09, 0.025]
+    MEANxmins = [-0.03,-0.025,0.0,0.0,0.0,0]
+    MEANxmaxs = [ 0.09, 0.025,0.25,2.5/100000.,0.2,800]
 
     # MEANxmins = [298]
     # MEANxmaxs = [311]
@@ -1374,7 +1359,7 @@ TopAlt = 4000
 
 
 # LIST OF MODEL CONFIGURATIONS
-xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302' , 'x303', 'x304']
+xStrs = ['x001', 'x101', 'x304', 'x204']
 chosenLabels = oldstrings(xStrs)
 
 # WHICH LEAD DAY FORECAST?
@@ -1635,21 +1620,14 @@ else:
     print("TimeMode needs to be 'LT' or 'UTC'")
 
 
-xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302' , 'x303', 'x304']
-
-
-# colours associated with each of the model runs
-PlotxStrColours = [ [0.9,0.0,0.0],
-                    [0.0,0.5,0.0], \
-                    [0.0,0.85,1.0], [0.0,0.6,1.0], [0.0,0.0,0.9], [0.4,0.0,0.5], \
-                    [0.5,0.85,1.0], [0.5,0.6,1.0], [0.5,0.0,0.9], [0.4,0.5,0.5] ]
-
-
+#xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302' , 'x303', 'x304']
+xStrs = ['x001', 'x101', 'x304', 'x204']
+PlotxStrIndices = [0,1,9,5]
 
 # Variables and Corresponding units and Colour Bar Limits
 Vars           = [   'T',    'Q',      'U',     'V',   'Hwind']
 VarUnitses     = [   'K', 'g/kg',    'm/s',   'm/s',   'm/s'  ]
-VarYLimses     = [[-2,2], [-2,2], [-9.5,-6.5], [-3,-0], [7,10] ]
+VarYLimses     = [[-2,2], [-2,2], [-9.5,-6.5], [-2.5,-0], [7,10] ]
 
 VarLongNames = ['Temperature', 'Water Vapor Mixing Ratio', 'U-Wind Velocity', 'V-Wind Velocity', \
                 'Horizontal Wind Speed', 'Potential Temperature']
@@ -1789,15 +1767,16 @@ for vari in range(2,5): # np.size(Vars)):
         xStr = xStrs[xstri]
 
         if (xStr == 'x001'): # add dotted line for x001 and dashed line for prognostic runs
-            exec("plt.plot(PlotTimes, HourlyMeans" + xStr + ", color = " + str(PlotxStrColours[xstri])  + \
+            exec("plt.plot(PlotTimes, HourlyMeans" + xStr + ", color = " + str(PlotxStrColours[PlotxStrIndices[xstri]])  + \
                  ", linestyle=':', linewidth = " + str(thickness) + ", label=xStr)" )
         else:
-            exec("plt.plot(PlotTimes, HourlyMeans" + xStr + ", color = " + str(PlotxStrColours[xstri])  + \
-                 ", linestyle='--', linewidth = " + str(thickness) + ", label=xStr)" )
+            exec("plt.plot(PlotTimes, HourlyMeans" + xStr + ", color = " + str(PlotxStrColours[PlotxStrIndices[xstri]])  + ", linestyle="+str(PlotxStrDashes[PlotxStrIndices[xstri]])+", linewidth = " + str(thickness) + ", label=xStr)" )
 
     #             ax.legend(bbox_to_anchor=(1.01, 1.02))
 
-    # limits and grids
+    # label
+    if (VarStr == 'V'):
+        plt.legend(np.append('Obs', oldstrings(xStrs)),loc='lower center')
 
     # Major ticks every 6 hours, minor ticks every 1
     major_xticks = np.arange(0, 25, 6)
@@ -2126,7 +2105,7 @@ lead = 1
 
 # lists of the variables and model configurations
 OriginalVarStrings = ['ta', 'q', 'u', 'v', 'theta','Hwind']
-xStrs = ['x001', 'x101', 'x201', 'x202' , 'x301', 'x302']
+xStrs = ['x001', 'x101', 'x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
 for vari in range(0,np.size(OriginalVarStrings )):
     Var = OriginalVarStrings [vari]
@@ -2161,12 +2140,12 @@ lead = 1
 StoredXstrs = ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
 
 # model runs to include on the stoplight diagrams (AND CORRESPONDING INDEX IN ALL STORED XSTRS)
-TableXstrs =  ['x001','x101','x201', 'x202' , 'x203', 'x204', 'x301', 'x302', 'x303', 'x304']
+TableXstrs =  ['x001','x101','x304', 'x204']
+TableXstris = [ 0, 1, 9, 5]
 TableXstrsLabels = oldstrings(TableXstrs)
 
 # CMZ, had to change these indices
 
-TableXstris = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 # variables to include on the stoplight diagrams
 # TableVars = ['T', 'Q', 'U', 'V', 'Hwind']    # for old model level based version
@@ -2272,10 +2251,10 @@ for yi in range(0,xDim-1):
     ax.plot([yi+0.5,yi+0.5], [0-0.5,yDim+0.5], color='black', linewidth=2)
 
 # special thick lines seperating default run and optimised runs
-ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
-ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
-if xDim > 6:
-  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
+#ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
+#ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
+#if xDim > 6:
+#  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
 
 # special thick lines for the outside boarders
 ax.plot([-0.5, xDim-0.5], [-0.5,-0.5], color='black', linewidth=5)
@@ -2302,7 +2281,7 @@ ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
-cbar.set_label('RMSE Relative to REF', fontsize=16)
+cbar.set_label('RMSE Relative to '+str(oldstrings(['x001'])[0]), fontsize=16)
 cbar.set_ticks([-0.15, 0.0, 0.15])
 cbar.set_ticklabels(['15% Decrease', 'Same', '15% Increase'])
 cbar.ax.tick_params(labelsize=13)
@@ -2310,7 +2289,10 @@ cbar.ax.tick_params(labelsize=13)
 if xDim > 6:
   thisFontSize=9
 else:
-  thisFontSize=18
+  thisFontSize=20
+
+SHIFTX=-0.20
+SHIFTY=-0.08
 
 # add numbers in each cell
 for xstri in range(np.size(TableXstrs)):
@@ -2322,9 +2304,9 @@ for xstri in range(np.size(TableXstrs)):
 
             # place a black number if the cell is a light colour
             if (localcolor >= -0.05) and (localcolor <= 0.05) :
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='black', fontsize=thisFontSize)
+                text = ax.text(xstri+SHIFTX, vari+SHIFTY, str(number), c='black', fontsize=thisFontSize)
             else:
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='white', fontsize=thisFontSize)
+                text = ax.text(xstri+SHIFTX, vari+SHIFTY, str(number), c='white', fontsize=thisFontSize)
                 text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
 
 if not os.path.exists(SAVEFOLDER):
@@ -2361,10 +2343,10 @@ for yi in range(0,xDim-1):
     ax.plot([yi+0.5,yi+0.5], [0-0.5,yDim+0.5], color='black', linewidth=2)
 
 # special thick lines seperating default run and optimised runs
-ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
-ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
-if xDim > 6:
-  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
+#ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
+#ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
+#if xDim > 6:
+#  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
 
 # special thick lines for the outside boarders
 ax.plot([-0.5, xDim-0.5], [-0.5,-0.5], color='black', linewidth=5)
@@ -2392,7 +2374,7 @@ ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
-cbar.set_label('Absolute Bias Relative to REF', fontsize=16)
+cbar.set_label('Absolute Bias Relative to '+str(oldstrings(['x001'])[0]), fontsize=16)
 cbar.set_ticks([-1.00, 0.0, 1.00])
 cbar.set_ticklabels(['100% Decrease', 'Same', '100% Increase'])
 cbar.ax.tick_params(labelsize=13)
@@ -2400,7 +2382,7 @@ cbar.ax.tick_params(labelsize=13)
 if xDim > 6:
   thisFontSize=9
 else:
-  thisFontSize=18
+  thisFontSize=20
 
 # add numbers in each cell
 for xstri in range(np.size(TableXstrs)):
@@ -2412,9 +2394,9 @@ for xstri in range(np.size(TableXstrs)):
 
             # place a black number if the cell is a light colour
             if (localcolor >= -0.05) and (localcolor <= 0.05) :
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='black', fontsize=thisFontSize)
+                text = ax.text(xstri+SHIFTX, vari+SHIFTY, str(number), c='black', fontsize=thisFontSize)
             else:
-                text = ax.text(xstri-0.28, vari-0.08, str(number), c='white', fontsize=thisFontSize)
+                text = ax.text(xstri+SHIFTX, vari+SHIFTY, str(number), c='white', fontsize=thisFontSize)
                 text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
 
 # SAVE THE RMSE PLOT
