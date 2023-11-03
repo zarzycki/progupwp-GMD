@@ -59,8 +59,8 @@ MissionNames = ['Atalante_Meteomodem', 'Atalante_Vaisala' , 'BCO_Vaisala'     , 
                 'Meteor_Vaisala'     , 'MS-Merian_Vaisala', 'RonBrown_Vaisala']
 
 
-OriginalVarStrings =  ['upwp', 'vpwp', 'wp2', 'tau_zm', 'em', 'Lscale']   #  ['ta', 'q', 'u', 'v']
-PlotVarStrings     =  ['UpWp', 'VpWp', 'Wp2', 'TAU_zm', 'EM', 'LSCALE']   #  ['T' , 'Q', 'U', 'V']
+OriginalVarStrings =  ['CLDLIQ','CLOUD','upwp', 'vpwp', 'wp2', 'tau_zm', 'em', 'Lscale']   #  ['ta', 'q', 'u', 'v']
+PlotVarStrings     =  ['CLDLIQ','CLOUD','UpWp', 'VpWp', 'Wp2', 'TAU_zm', 'EM', 'LSCALE']   #  ['T' , 'Q', 'U', 'V']
 
 # if the user chooses local time, set the start time back 4 hours (Barbados is in UTC-04:00)
 if (UTCorLocal == 'UTC'):
