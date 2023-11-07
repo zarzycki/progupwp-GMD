@@ -486,14 +486,14 @@ print("<<<<<< DONE RMSE, BIASES, and MEANS from model runs >>>>>>>")
 
 print(">>>>>> READING RMSE, BIASES, and MEANS for turbulence variables <<<<<<<<")
 
-TurbVars         =  ['UpWp', 'VpWp', 'Wp2', \
+TurbVars         =  ['UpWp', 'VpWp', 'Wp2', 'Up2','Vp2', 'Wp3', \
                      'TAU_zm', 'EM', 'LSCALE','CLOUD','CLDLIQ']
 
-TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance', \
-                    'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
+TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance','Zonal Wind Variance','Meridional Wind Variance', \
+                    'Wp3', 'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
                     'Cloud fraction', 'Cloud liquid']
 
-TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', \
+TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2','m\u00b2/s\u00b2', 'm\u00b3/s\u00b3', \
                      's', 'm\u00b2/s\u00b2',       'm','percent','percent']
 
 # LOOPS FOR TURBULENCE VARIABLES
@@ -576,6 +576,7 @@ if plot_cm1:
     cm1upup = [None] * cm1_num_files
     cm1vpvp = [None] * cm1_num_files
     cm1wpwp = [None] * cm1_num_files
+    cm1wpwpwp = [None] * cm1_num_files
     cm1tke = [None] * cm1_num_files
 
     # Loop over files and load data into arrays
@@ -603,6 +604,8 @@ if plot_cm1:
         cm1upup[i] = cm1data.upup.values[0,:,0,0]
         cm1vpvp[i] = cm1data.vpvp.values[0,:,0,0]
         cm1wpwp[i] = cm1data.wpwp.values[0,:,0,0]
+        cm1wpwpwp[i] = cm1data.wpwpwp.values[0,0:75,0,0]
+
         cm1tke[i] = 0.5*(cm1data.upup.values[0,:,0,0] + cm1data.vpvp.values[0,:,0,0] + cm1data.wpwp.values[0,:,0,0])
 
         cm1nlev = len(cm1data.zh.values[:])
@@ -638,6 +641,7 @@ if plot_cm1:
         'Up2': cm1upup,
         'Vp2': cm1vpvp,
         'Wp2': cm1wpwp,
+        'Wp3': cm1wpwpwp,
         'CLDLIQ': cm1qc,
         'CLOUD': cm1qcfrac,
         'EM': cm1tke,
@@ -1207,18 +1211,18 @@ for xx in range(arr_ncases):
     print("DOING LOOP "+str(xx))
 
     Vars = []
-    TurbVars         =  ['UpWp', 'VpWp', 'Wp2', \
+    TurbVars         =  ['UpWp', 'VpWp', 'Wp2', 'Up2','Vp2', 'Wp3', \
                          'TAU_zm', 'EM', 'LSCALE','CLOUD','CLDLIQ']
 
-    TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance', \
-                        'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
+    TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance','Zonal Wind Variance','Meridional Wind Variance', \
+                        'Wp3', 'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
                         'Cloud fraction', 'Cloud liquid']
 
-    TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', \
-                         's', 'm\u00b2/s\u00b2',       'm','percent','kg/kg']
+    TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2','m\u00b2/s\u00b2', 'm\u00b3/s\u00b3', \
+                         's', 'm\u00b2/s\u00b2',       'm','percent','percent']
 
-    MEANxmins = [-0.03, -0.025, 0.0,      0,   0,   0, 0.0,      0.0]
-    MEANxmaxs = [ 0.09,  0.025, 0.25,  3000, 0.5, 800, 0.2, 0.000025]
+    MEANxmins = [-0.03, -0.025, 0.0,0.0,0.0,    0.0,  0,   0,   0, 0.0,      0.0]
+    MEANxmaxs = [ 0.09,  0.025, 0.25,0.25,0.25, 0.25,  3000, 0.5, 800, 0.2, 0.000025]
 
     thickness = 1.8 # set line thicknesses in plot
 
@@ -2351,7 +2355,7 @@ ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
 cbar.set_label('RMSE Relative to '+str(oldstrings(['x001'])[0]), fontsize=16)
 cbar.set_ticks([-0.15, 0.0, 0.15])
-cbar.set_ticklabels(['15% Decrease', 'Same', '15% Increase'])
+cbar.set_ticklabels(['15% Decrease', 'No change', '15% Increase'])
 cbar.ax.tick_params(labelsize=13)
 
 if xDim > 6:
@@ -2391,7 +2395,7 @@ fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111)
 
 im = ax.pcolormesh(Xmesh, Ymesh, BIASarrayDiffRatios, shading = 'nearest', \
-                   cmap=plt.cm.get_cmap('seismic', 17), vmin=-1.00, vmax=1.00)
+                   cmap=plt.cm.get_cmap('seismic', 17), vmin=-1.5, vmax=1.5)
 
 
 plt.title('CAM Biases Between ' + str(MinAlt) + ' m and ' + str(MaxAlt) + ' m Altitude' + '\n', fontsize=18)
@@ -2443,8 +2447,8 @@ ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
 cbar.set_label('Absolute Bias Relative to '+str(oldstrings(['x001'])[0]), fontsize=16)
-cbar.set_ticks([-1.00, 0.0, 1.00])
-cbar.set_ticklabels(['100% Decrease', 'Same', '100% Increase'])
+cbar.set_ticks([-1.5, 0.0, 1.5])
+cbar.set_ticklabels(['150% Decrease', 'No change', '150% Increase'])
 cbar.ax.tick_params(labelsize=13)
 
 if xDim > 6:
