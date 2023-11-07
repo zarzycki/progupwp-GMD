@@ -2,7 +2,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-from scipy.stats import skew
+from scipy import stats
 import xarray as xr
 import pandas as pd
 import datetime
@@ -236,12 +236,17 @@ for xStr in xStrs:
 
     # Print minimum "valid" dudz not filtered out
     print(xStr)
-    exec("cmz_dudz = np.abs(dUdZprofiles" + xStr +")")
+    exec("cmz_dudz = dUdZprofiles" + xStr)
     exec("cmz_dual = DualMap" + xStr)
     exec("cmz_keff = KeffProfiles" + xStr)
-    valid_shears = np.where(cmz_dual == 2,cmz_dudz,1000000.)
-    print(np.nanmin(valid_shears))
+
     # If 100000. that means there are no "true" Keff < 0 lines.
+    print(np.nanmin(np.where(cmz_dual == 2,np.abs(cmz_dudz),1000000.)))
+
+    valid_shears = np.where(cmz_dual == 2,np.abs(cmz_dudz),np.nan)
+
+    print('Mean ',np.nanmean(valid_shears))
+    print('Median ',np.nanmedian(valid_shears))
 
     masked_keff_arr[keff_counter,:,:] = np.where(cmz_dual != 1,cmz_keff,np.nan)
     keff_counter = keff_counter + 1
@@ -585,13 +590,13 @@ if plot_cm1:
         cmz_print_filename(cm1file)
         cm1u[i] = cm1data.u.values[0,:,0,0]
         cm1z[i] = cm1data.zh.values[:]
-        cm1z[i] = cm1z[i] / 1000.
+        cm1z[i] = cm1z[i] / 1000.   # scale from m to km
         cm1prs[i] = cm1data.prs.values[0,:,0,0]
         cm1v[i] = cm1data.v.values[0,:,0,0]
         cm1t[i] = cm1data.t.values[0,:,0,0]
         cm1th[i] = cm1data.th.values[0,:,0,0]
         cm1q[i] = cm1data.qv.values[0,:,0,0]
-        cm1q[i] = cm1q[i] * 1000
+        cm1q[i] = cm1q[i] * 1000    # scale from kg/kg to g/kg
         cm1wsp[i] = cm1data.wsp.values[0,:,0,0]
         cm1upwp[i] = cm1data.upwp.values[0,:,0,0]
         cm1vpwp[i] = cm1data.vpwp.values[0,:,0,0]
@@ -600,7 +605,7 @@ if plot_cm1:
         cm1wprof[i] = cm1data.wprof.values[0,1::,0,0]
         cm1qcfrac[i] = cm1data.qcfrac.values[0,:,0,0]
         cm1qc[i] = cm1data.qc.values[0,:,0,0]
-        cm1qc[i] = cm1qc[i]
+        cm1qc[i] = cm1qc[i] * 1000.   # scale from kg/kg to g/kg
         cm1upup[i] = cm1data.upup.values[0,:,0,0]
         cm1vpvp[i] = cm1data.vpvp.values[0,:,0,0]
         cm1wpwp[i] = cm1data.wpwp.values[0,:,0,0]
@@ -1186,17 +1191,14 @@ print_break()
 
 # THIS BLOCK PLOTS MEAN PROFILES FOR TURBULENCE VARIABLES FROM MANY RUNS/LEADS ON ONE PLOT
 
-# Variables to choose from
-
-arr_minAlt = [60,60,  60,60,  60,60]
-arr_maxAlt = [2500,2500,  2500,2500,  2500,2500]
-arr_titleOption = ['no','no',  'no','no',  'no','no']
-#arr_legendOption = ['no','inside','no','inside']
+arr_maxAlt = [2500,2500, 2500,2500, 2500,2500]
+arr_titleOption = ['no','no', 'no','no', 'no','no']
+arr_legendOption = ['no','inside', 'no','inside', 'no','inside']
 arr_ncases = 6
 
 for xx in range(arr_ncases):
 
-    maxAlt =  arr_maxAlt[xx]
+    maxAlt  = arr_maxAlt[xx] # [m]
 
     #CMZ edit this!
     if xx <= 1:
@@ -1216,19 +1218,18 @@ for xx in range(arr_ncases):
 
     TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance','Zonal Wind Variance','Meridional Wind Variance', \
                         'Wp3', 'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
-                        'Cloud fraction', 'Cloud liquid']
+                        'Cloud Fraction', ' Cloud Liquid']
 
     TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2','m\u00b2/s\u00b2', 'm\u00b3/s\u00b3', \
-                         's', 'm\u00b2/s\u00b2',       'm','percent','percent']
+                         's', 'm\u00b2/s\u00b2', 'm','percent','g/kg']
 
     MEANxmins = [-0.03, -0.025, 0.0,0.0,0.0,    0.0,  0,   0,   0, 0.0,      0.0]
-    MEANxmaxs = [ 0.09,  0.025, 0.25,0.25,0.25, 0.25,  3000, 0.5, 800, 0.2, 0.000025]
+    MEANxmaxs = [ 0.09,  0.025, 0.25,0.25,0.25, 0.25,  3000, 0.5, 800, 0.25, 0.025]
 
     thickness = 1.8 # set line thicknesses in plot
 
     # calculate the index in "alts" corresponding to this altitude
     maxAlti = int( (maxAlt / 10) + 1 )
-
 
     # CREATE AN ARRAY WHICH LISTS THE CORRESPONDING INDICES OF THE XSTRS CHOSEN
     # IN THE ORIGINAL MASTER XSTR LIST (this is here because np.find doesn't work)
@@ -1306,6 +1307,11 @@ for xx in range(arr_ncases):
 
                 # retrievet the RMSE storage array for this variable
                 exec("MeansToPlot = " + Var + "_MeansArray[xstri,lead,0:maxAlti]")
+
+                # Unit conversion
+                if Var == 'CLDLIQ':
+                    MeansToPlot = MeansToPlot * 1000.
+
                 # select only the altitudes beneath the chosen macumum
                 AltsToPlot = alts[0:maxAlti]
 
@@ -1322,16 +1328,41 @@ for xx in range(arr_ncases):
 
             # Check if Var exists in dictionary
             if Var in cm1_data_dict:
+                did_we_find_cm1 = True
                 # Plot data for each file
                 for i, datatmp in enumerate(cm1_data_dict[Var]):
                     plt.plot(datatmp[cm1_start_index::], cm1z[i][cm1_start_index::], color=cm1colors[i % len(cm1colors)], linewidth=1.5, label='CM1')
             else:
                 print(f"CM1 Variable '{Var}' not recognized.")
+                did_we_find_cm1 = False
+
+            # how do you want a legend? (options = 'no', 'left', 'inside', 'right')
+            LegendOption = arr_legendOption[xx]
+
+            # set the name of the plots depending on if there is a title and a legend and where they are
+            if (TitleOption == 'no'):
+                AnnoStyle = 'SansTitle'
+            elif(TitleOption == 'yes'):
+                AnnoStyle = 'WithTitle'
+            else:
+                print("need a 'no' or 'yes' for Title Option")
+
+            if (LegendOption == 'no'):
+                AnnoStyle = AnnoStyle + 'SansLegend'
+
+            elif(LegendOption == 'left'):
+                AnnoStyle = AnnoStyle + 'LeftLegend'
+
+            elif(LegendOption == 'inside'):
+                AnnoStyle = AnnoStyle + 'InsideLegend'
+
+            elif(LegendOption == 'right'):
+                AnnoStyle = AnnoStyle + 'RightLegend'
+            else:
+                print("need a 'no' or 'left' or 'inside' or 'right' for Legend Option")
 
             # plot accessories
             plt.grid('on', linewidth=0.25)
-
-    #         plt.legend(ChosenXstrs[0:LastXstr])
 
             # label with the corresponding variable name whether its a state or a turbulence variable
             if  (Var in Vars):
@@ -1346,6 +1377,20 @@ for xx in range(arr_ncases):
             plt.xlim([MEANxmin,MEANxmax])
             plt.ylim([0,maxAlt*0.001])
 
+            if(TitleOption == 'yes'):
+                plt.title(str(lead) + '-Day Lead Vertical Mean Profiles for ' + TurbVarLongNames[turbvari])
+
+            # If plotting CM1, glue that into the special strings array
+            if did_we_find_cm1:
+                special_strings = np.append(ChosenLabels[0:LastXstr],'CM1')
+            else:
+                special_strings = ChosenLabels[0:LastXstr]
+            if(LegendOption=='left'):
+                ax.legend(special_strings, bbox_to_anchor=(0.03, 0.9))
+            elif(LegendOption=='inside'):
+                plt.legend(special_strings ,loc='lower right')
+            elif(LegendOption=='right'):
+                ax.legend(special_strings, bbox_to_anchor=(1.17, 0.9))
 
             # include a thin black y-axis line
             plt.plot([0,0],[0,maxAlt],'k', linewidth=0.5)
@@ -1354,7 +1399,7 @@ for xx in range(arr_ncases):
                 os.makedirs(SAVEFOLDER)
 
             savefigname=SAVEFOLDER + Var + '_MeanProfiles' + str(lead) + 'DayLead' + \
-                        ChosenXstrs[0] + ChosenXstrs[LastXstr-1] + '_2500mTopSansTitleSanLegend.'+FILEOUTTYPE
+                        ChosenXstrs[0] + ChosenXstrs[LastXstr-1] + '_'+str(maxAlt)+'mTop' + AnnoStyle + '.'+FILEOUTTYPE
             plt.savefig( savefigname, \
                         facecolor='w',dpi=300)
             cmz_writing_fig(savefigname,5)
@@ -2354,8 +2399,8 @@ ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
 cbar.set_label('RMSE Relative to '+str(oldstrings(['x001'])[0]), fontsize=16)
-cbar.set_ticks([-0.15, 0.0, 0.15])
-cbar.set_ticklabels(['15% Decrease', 'No change', '15% Increase'])
+cbar.set_ticks([-0.15, -0.1, -0.05, 0.0, 0.05, 0.1, 0.15])
+cbar.set_ticklabels(['15% Decrease', '10% Decrease', '5% Decrease', 'No change', '5% Increase', '10% Increase', '15% Increase'])
 cbar.ax.tick_params(labelsize=13)
 
 if xDim > 6:
@@ -2447,8 +2492,8 @@ ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
 cbar.set_label('Absolute Bias Relative to '+str(oldstrings(['x001'])[0]), fontsize=16)
-cbar.set_ticks([-1.5, 0.0, 1.5])
-cbar.set_ticklabels(['150% Decrease', 'No change', '150% Increase'])
+cbar.set_ticks([-1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5])
+cbar.set_ticklabels(['150% Decrease', '100% Decrease', '50% Decrease', 'No change', '50% Increase', '100% Increase', '150% Increase'])
 cbar.ax.tick_params(labelsize=13)
 
 if xDim > 6:
@@ -2480,8 +2525,91 @@ SaveFile = 'TQUVHwindStoplightDiagramBIAS' + str(MinAlt) + 'mTo' + str(MaxAlt) +
 plt.savefig( SAVEFOLDER + SaveFile, facecolor='w', bbox_inches='tight', pad_inches=0.5, dpi=300)
 cmz_writing_fig(SAVEFOLDER + SaveFile,11)
 plt.close()
-# In[ ]:
 
+print_break()
 
+print("Testing stat significance of mean var profiles between two configs")
 
+# Function to load data
+def load_data(files, variable):
+    ds = xr.open_mfdataset(
+        files,
+        concat_dim='sounding',
+        combine='nested'
+    )
+    data_var = ds[variable]
+    data_var.load()
+    ds.close()
+    return data_var
 
+do_stat_plots=False   # Debugging plots
+alpha = 0.05  # significance level
+
+base_dir = VOLNAME+'/ThesisData/StephanSoundings/WithCESMdata/'
+base_filenames = [
+    'EUREC4A_Atalante_Meteomodem-RS_L2_v3.0.0',
+    'EUREC4A_Atalante_Vaisala-RS_L2_v3.0.0',
+    'EUREC4A_BCO_Vaisala-RS_L2_v3.0.0',
+    'EUREC4A_MS-Merian_Vaisala-RS_L2_v3.0.0',
+    'EUREC4A_Meteor_Vaisala-RS_L2_v3.0.0',
+    'EUREC4A_RonBrown_Vaisala-RS_L2_v3.0.0'
+]
+
+user_variables = ['theta','q']
+
+configs_to_compare = ['x001','x101']
+
+print(configs_to_compare)
+print(user_variables)
+
+for user_variable in user_variables:
+
+    # Define the variable name suffix based on user input
+    variable_suffix = f"{user_variable}_cesmval"
+
+    files_a = [f"{base_dir}/{configs_to_compare[0]}/{base}-{configs_to_compare[0]}_LeadDay1wTurb.nc" for base in base_filenames]
+    files_b = [f"{base_dir}/{configs_to_compare[1]}/{base}-{configs_to_compare[1]}_LeadDay1wTurb.nc" for base in base_filenames]
+
+    cesmval_a = load_data(files_a, variable_suffix)
+    cesmval_b = load_data(files_b, variable_suffix)
+
+    #paired_values_a_1d = cesmval_a.values.flatten()
+    #paired_values_b_1d = cesmval_b.values.flatten()
+    #mask_1d = ~np.isnan(paired_values_a_1d) & ~np.isnan(paired_values_b_1d)
+    #filtered_values_a_1d = paired_values_a_1d[mask_1d]
+    #filtered_values_b_1d = paired_values_b_1d[mask_1d]
+    #t_stat, p_value = ttest_rel(filtered_values_a_1d, filtered_values_b_1d)
+
+    # Preallocate array for p-values
+    p_values = np.zeros(cesmval_a.shape[1])
+
+    for i in range(cesmval_a.shape[1]):
+        paired_values_a = cesmval_a[:, i].values
+        paired_values_b = cesmval_b[:, i].values
+        mask = ~np.isnan(paired_values_a) & ~np.isnan(paired_values_b)
+        filtered_values_a = paired_values_a[mask]
+        filtered_values_b = paired_values_b[mask]
+
+        if len(filtered_values_a) > 1:
+            t_stat, p_value = stats.ttest_rel(filtered_values_a, filtered_values_b)
+            #t_stat, p_value = stats.wilcoxon(filtered_values_a, filtered_values_b)
+            p_values[i] = p_value
+
+    significant_levels = np.where(p_values < alpha)[0]
+
+    significant_levels_count = np.sum(p_values < alpha)
+    total_levels = len(p_values)
+    fraction_significant = significant_levels_count / total_levels
+    print("*** "+user_variable)
+    print(f"Fraction of levels with p < 0.05: {fraction_significant:.4f}")
+
+    if do_stat_plots:
+        # p-val vs. level index
+        plt.figure(figsize=(10, 5))
+        plt.plot(p_values, label='P-values')
+        plt.axhline(y=alpha, color='r', linestyle='--', label='Significance threshold (0.05)')
+        plt.legend()
+        plt.xlabel('Level index')
+        plt.ylabel('P-value')
+        plt.title('P-values for Paired T-Test at Each Level')
+        plt.show()
