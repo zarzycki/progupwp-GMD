@@ -491,14 +491,17 @@ print("<<<<<< DONE RMSE, BIASES, and MEANS from model runs >>>>>>>")
 
 print(">>>>>> READING RMSE, BIASES, and MEANS for turbulence variables <<<<<<<<")
 
-TurbVars         =  ['UpWp', 'VpWp', 'Wp2', 'Up2','Vp2', 'Wp3', \
+TurbVars         =  ['UpWp', 'VpWp', 'Wp2', 'Up2','Vp2', 'Wp3', 'wpthlp','wprtp','thlp2','rtp2', \
                      'TAU_zm', 'EM', 'LSCALE','CLOUD','CLDLIQ']
 
-TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance','Zonal Wind Variance','Meridional Wind Variance', \
-                    'Wp3', 'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
+TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance','Zonal Wind Variance','Meridional Wind Variance', 'Wp3',  \
+                    '_','_','_','_', \
+                    'Momentum Time Scale',      \
+                    'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
                     'Cloud fraction', 'Cloud liquid']
 
 TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2','m\u00b2/s\u00b2', 'm\u00b3/s\u00b3', \
+                    '_','_','_','_', \
                      's', 'm\u00b2/s\u00b2',       'm','percent','percent']
 
 # LOOPS FOR TURBULENCE VARIABLES
@@ -583,6 +586,10 @@ if plot_cm1:
     cm1wpwp = [None] * cm1_num_files
     cm1wpwpwp = [None] * cm1_num_files
     cm1tke = [None] * cm1_num_files
+    cm1thlfr = [None] * cm1_num_files
+    cm1qtfr = [None] * cm1_num_files
+    cm1thvarr = [None] * cm1_num_files
+    cm1qtvarr = [None] * cm1_num_files
 
     # Loop over files and load data into arrays
     for i, cm1file in enumerate(cm1files):
@@ -610,7 +617,10 @@ if plot_cm1:
         cm1vpvp[i] = cm1data.vpvp.values[0,:,0,0]
         cm1wpwp[i] = cm1data.wpwp.values[0,:,0,0]
         cm1wpwpwp[i] = cm1data.wpwpwp.values[0,0:75,0,0]
-
+        cm1thlfr[i] = cm1data.thlfr.values[0,0:75,0,0] + cm1data.thlfs.values[0,0:75,0,0] + cm1data.thlfd.values[0,0:75,0,0]
+        cm1qtfr[i] = cm1data.qtfr.values[0,0:75,0,0] + cm1data.qtfs.values[0,0:75,0,0] + cm1data.qtfd.values[0,0:75,0,0]
+        cm1thvarr[i] = cm1data.thvarr.values[0,:,0,0]
+        cm1qtvarr[i] = cm1data.qtvarr.values[0,:,0,0]
         cm1tke[i] = 0.5*(cm1data.upup.values[0,:,0,0] + cm1data.vpvp.values[0,:,0,0] + cm1data.wpwp.values[0,:,0,0])
 
         cm1nlev = len(cm1data.zh.values[:])
@@ -650,7 +660,11 @@ if plot_cm1:
         'CLDLIQ': cm1qc,
         'CLOUD': cm1qcfrac,
         'EM': cm1tke,
-        'PMID': cm1prs
+        'PMID': cm1prs,
+        'rtp2': cm1qtvarr,
+        'thlp2': cm1thvarr,
+        'wprtp': cm1qtfr,
+        'wpthlp': cm1thlfr
     }
 
 # THIS BLOCK PLOTS RMSE or MEAN PROFILES FOR MANY RUNS/LEADS ON ONE PLOT
@@ -1213,18 +1227,21 @@ for xx in range(arr_ncases):
     print("DOING LOOP "+str(xx))
 
     Vars = []
-    TurbVars         =  ['UpWp', 'VpWp', 'Wp2', 'Up2','Vp2', 'Wp3', \
+    TurbVars         =  ['UpWp', 'VpWp', 'Wp2', 'Up2','Vp2', 'Wp3', 'wpthlp','wprtp','thlp2','rtp2', \
                          'TAU_zm', 'EM', 'LSCALE','CLOUD','CLDLIQ']
 
-    TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance','Zonal Wind Variance','Meridional Wind Variance', \
-                        'Wp3', 'Momentum Time Scale',      'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
-                        'Cloud Fraction', ' Cloud Liquid']
+    TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent Flux','Vertical Wind Variance','Zonal Wind Variance','Meridional Wind Variance', 'Wp3',  \
+                        '_','_','_','_', \
+                        'Momentum Time Scale',      \
+                        'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
+                        'Cloud fraction', 'Cloud liquid']
 
     TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2','m\u00b2/s\u00b2', 'm\u00b3/s\u00b3', \
-                         's', 'm\u00b2/s\u00b2', 'm','percent','g/kg']
+                        '_','_','_','_', \
+                         's', 'm\u00b2/s\u00b2',       'm','percent','percent']
 
-    MEANxmins = [-0.03, -0.025, 0.0,0.0,0.0,    0.0,  0,   0,   0, 0.0,      0.0]
-    MEANxmaxs = [ 0.09,  0.025, 0.25,0.25,0.25, 0.25,  3000, 0.5, 800, 0.25, 0.025]
+    MEANxmins = [-0.03, -0.025, 0.0,  0.0, 0.0,  0.0, -0.025,  0.0000,    0,          0,       0,   0,   0,  0.0, 0.0  ]
+    MEANxmaxs = [ 0.09,  0.025, 0.25,0.25,0.25, 0.25,  0.025,  0.0001, 0.06,  0.0000005,    3000, 0.5, 800, 0.25, 0.025]
 
     thickness = 1.8 # set line thicknesses in plot
 
