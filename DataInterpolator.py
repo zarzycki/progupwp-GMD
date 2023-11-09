@@ -997,7 +997,7 @@ for missi in range(0, np.size(MissionNames) ):
 print("--> Adding turbulence variables to CESM data")
 
 # variables that you want to add to the enhanced sounding data
-CESMvariables = ['CLOUD','CLDLIQ','upwp','vpwp','wp2','tau_zm','em','Lscale']
+CESMvariables = ['CLOUD','CLDLIQ','upwp','vpwp','wp2','up2','vp2','wp3','wpthlp','wprtp','thlp2','rtp2','ICWMR','tau_zm','em','Lscale']
 
 # strings for the model configurations to be looped over
 #xStrs = ['x101'] #, 'x101', 'x201', 'x202', 'x203', 'x204']

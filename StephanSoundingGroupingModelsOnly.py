@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -10,11 +9,8 @@ import os
 import csv
 import sys
 
-
-# THIS BLOCK CREATES ARRAYS WHICH STORE VARIABLES FROM ALL SOUNDINGS FROM PARTICULAR TIMES OF DAY
-
 # VARIABLES TO BE SET BY THE USER:
-HourBlockLength  =  24     # set how many hours you want to be in a time group (must be a factor of 24)
+HourBlockLength  =  24    # set how many hours you want to be in a time group (must be a factor of 24)
 UTCorLocal       = 'UTC'  # do you want to group by UTC time or local time? (put 'UTC' or 'Local Time' as a string)
 OverallStartHour =  0     # hour of the day you want to start the grouping brackets
 # (whether OverallStartHour is in UTC or local depends on previous variable)
@@ -36,7 +32,7 @@ def get_arg(index):
 VOLNAME=get_arg(1)
 thisxStr=get_arg(2)
 
-#xStrs = ['x001', 'x101', 'x201', 'x202', 'x203', 'x204']
+# If single string was passed in (preferred) do that, otherwise loop over strings below
 if bool(thisxStr):
     xStrs = [thisxStr]
 else:
@@ -58,9 +54,8 @@ print(refxStr)
 MissionNames = ['Atalante_Meteomodem', 'Atalante_Vaisala' , 'BCO_Vaisala'     , \
                 'Meteor_Vaisala'     , 'MS-Merian_Vaisala', 'RonBrown_Vaisala']
 
-
-OriginalVarStrings =  ['CLDLIQ','CLOUD','upwp', 'vpwp', 'wp2', 'tau_zm', 'em', 'Lscale']   #  ['ta', 'q', 'u', 'v']
-PlotVarStrings     =  ['CLDLIQ','CLOUD','UpWp', 'VpWp', 'Wp2', 'TAU_zm', 'EM', 'LSCALE']   #  ['T' , 'Q', 'U', 'V']
+OriginalVarStrings =  ['CLDLIQ','CLOUD','upwp', 'vpwp', 'wp2', 'up2', 'vp2', 'wp3', 'wpthlp','wprtp','thlp2','rtp2','ICWMR', 'tau_zm', 'em', 'Lscale']
+PlotVarStrings     =  ['CLDLIQ','CLOUD','UpWp', 'VpWp', 'Wp2', 'Up2', 'Vp2', 'Wp3', 'wpthlp','wprtp','thlp2','rtp2','ICWMR', 'TAU_zm', 'EM', 'LSCALE']
 
 # if the user chooses local time, set the start time back 4 hours (Barbados is in UTC-04:00)
 if (UTCorLocal == 'UTC'):
