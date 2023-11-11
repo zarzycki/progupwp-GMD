@@ -498,11 +498,11 @@ TurbVarLongNames = ['U-Wind Vertical Turbulent Flux','V-Wind Vertical Turbulent 
                     '_','_','_','_', \
                     'Momentum Time Scale',      \
                     'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
-                    'Cloud fraction', 'Cloud liquid']
+                    'Cloud Fraction', 'Cloud Liquid']
 
 TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2','m\u00b2/s\u00b2', 'm\u00b3/s\u00b3', \
                     '_','_','_','_', \
-                     's', 'm\u00b2/s\u00b2',       'm','percent','percent']
+                     's', 'm\u00b2/s\u00b2',       'm','percent','kg/kg']
 
 # LOOPS FOR TURBULENCE VARIABLES
 for vari in range(0, np.size(TurbVars)):
@@ -1234,11 +1234,11 @@ for xx in range(arr_ncases):
                         '_','_','_','_', \
                         'Momentum Time Scale',      \
                         'Turbulent Kinetic Energy', 'Turbulent Mixing Length', \
-                        'Cloud fraction', 'Cloud liquid']
+                        'Cloud Fraction', 'Cloud Liquid']
 
     TurbVarUnitses   = [ 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2', 'm\u00b2/s\u00b2','m\u00b2/s\u00b2', 'm\u00b3/s\u00b3', \
                         '_','_','_','_', \
-                         's', 'm\u00b2/s\u00b2',       'm','percent','percent']
+                         's', 'm\u00b2/s\u00b2',       'm','percent','kg/kg']
 
     MEANxmins = [-0.03, -0.025, 0.0,  0.0, 0.0,  0.0, -0.025,  0.0000,    0,          0,       0,   0,   0,  0.0, 0.0  ]
     MEANxmaxs = [ 0.09,  0.025, 0.25,0.25,0.25, 0.25,  0.025,  0.0001, 0.06,  0.0000005,    3000, 0.5, 800, 0.25, 0.025]
@@ -2374,8 +2374,6 @@ ax.grid(color='black', linewidth=5, which='minor')
 plt.xlim([-0.5, xDim-0.5])
 plt.ylim([-0.5, yDim-0.5])
 
-
-
 # plot lines to create a grid around each cell
 # (work around for ax.grid(which='minor') not working)
 for xi in range(0,yDim-1):
@@ -2383,12 +2381,6 @@ for xi in range(0,yDim-1):
 
 for yi in range(0,xDim-1):
     ax.plot([yi+0.5,yi+0.5], [0-0.5,yDim+0.5], color='black', linewidth=2)
-
-# special thick lines seperating default run and optimised runs
-#ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
-#ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
-#if xDim > 6:
-#  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
 
 # special thick lines for the outside boarders
 ax.plot([-0.5, xDim-0.5], [-0.5,-0.5], color='black', linewidth=5)
@@ -2457,7 +2449,7 @@ fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111)
 
 im = ax.pcolormesh(Xmesh, Ymesh, BIASarrayDiffRatios, shading = 'nearest', \
-                   cmap=plt.cm.get_cmap('seismic', 17), vmin=-1.5, vmax=1.5)
+                   cmap=plt.cm.get_cmap('seismic', 17), vmin=-1.0, vmax=1.0)
 
 
 plt.title('CAM Biases Between ' + str(MinAlt) + ' m and ' + str(MaxAlt) + ' m Altitude' + '\n', fontsize=18)
@@ -2475,12 +2467,6 @@ for xi in range(0,yDim-1):
 
 for yi in range(0,xDim-1):
     ax.plot([yi+0.5,yi+0.5], [0-0.5,yDim+0.5], color='black', linewidth=2)
-
-# special thick lines seperating default run and optimised runs
-#ax.plot([0.5,0.5], [-0.5, 5.5], color='black', linewidth=5)
-#ax.plot([1.5,1.5], [-0.5, 5.5], color='black', linewidth=5)
-#if xDim > 6:
-#  ax.plot([5.5,5.5], [-0.5, 5.5], color='black', linewidth=5)
 
 # special thick lines for the outside boarders
 ax.plot([-0.5, xDim-0.5], [-0.5,-0.5], color='black', linewidth=5)
@@ -2509,8 +2495,8 @@ ax.set_yticklabels(TableVarLongNames,  fontsize=15 , rotation=15)
 # color bar and labels
 cbar = fig.colorbar(im, pad=0.05, shrink=1, orientation = 'vertical' ,drawedges=True)
 cbar.set_label('Absolute Bias Relative to '+str(oldstrings(['x001'])[0]), fontsize=16)
-cbar.set_ticks([-1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5])
-cbar.set_ticklabels(['150% Decrease', '100% Decrease', '50% Decrease', 'No change', '50% Increase', '100% Increase', '150% Increase'])
+cbar.set_ticks([-1.0, -0.5, -0.25, 0.0, 0.25, 0.5, 1.0])
+cbar.set_ticklabels(['100% Decrease', '50% Decrease', '25% Decrease', 'No change', '25% Increase', '50% Increase', '100% Increase'])
 cbar.ax.tick_params(labelsize=13)
 
 if xDim > 6:
