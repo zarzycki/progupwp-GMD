@@ -295,9 +295,10 @@ plt.axvline(x=0, color='black', linestyle='-', linewidth=1)
 plt.legend(legend_labels,fontsize=20)
 
 # Specify your desired font sizes
-plt.title('Binned effective eddy diffusivities between '+str(TopP)+' and '+str(BotP)+' hPa',fontsize=18)
+#plt.title('Binned effective eddy diffusivities between '+str(TopP)+' and '+str(BotP)+' hPa',fontsize=18)
+plt.title('Binned $K_{{eff}}$ between {} and {} hPa'.format(BotP, TopP), fontsize=18)
 
-plt.xlabel('Effective eddy diffusivity (m\u00b2/s)',fontsize=16)
+plt.xlabel('$K_{{eff}}$ (m\u00b2/s)',fontsize=16)
 plt.ylabel('Frequency',fontsize=16)
 
 plt.xticks(fontsize=14)
@@ -322,7 +323,7 @@ print_break()
 
 
 #CMZ
-my_dpi = 60  # 600 for publication
+my_dpi = 600  # 600 for publication
 
 # plot maps of where there are upgradient fluxes in CAM output
 xvals = np.arange(0,1546,1)
@@ -560,7 +561,8 @@ plot_cm1=True
 if plot_cm1:
     cm1_start_index = 1    # what "level" do we start plotting at (0 means plot all)
     cm1files = ['cm1-reference/avg.nc']
-    cm1colors = ['gray']
+    cm1colors = ['darkgrey']
+    cm1_linewidth = 1.7
 
     # Initialize arrays
     cm1_num_files = len(cm1files)
@@ -720,7 +722,7 @@ for xx in range(arr_ncases):
 
     AltsToPlot = alts[minAlti:maxAlti] * 0.001 # convert to [km]
 
-    thickness = 1.8 # set line thicknesses in plot
+    thickness = 1.9 # set line thicknesses in plot
 
     # set the name of the plots depending on if there is a title and a legend and where they are
     if (TitleOption == 'no'):
@@ -1103,7 +1105,7 @@ for xx in range(arr_ncases):
 
             # PLOT A THICK BLACK LINE FOR THE OBSERVATIONS IN NON-TURBULENCE VARIABLES
             if  (Var in Vars):
-                plt.plot(ObsMeansToPlot[minAlti:maxAlti], AltsToPlot, color = 'k', linewidth=2.0, \
+                plt.plot(ObsMeansToPlot[minAlti:maxAlti], AltsToPlot, color = 'k', linewidth=2.5, \
                          label='Observations')
 
             if plot_cm1:
@@ -1111,7 +1113,7 @@ for xx in range(arr_ncases):
                 if Var in cm1_data_dict:
                     # Plot data for each file
                     for i, datatmp in enumerate(cm1_data_dict[Var]):
-                        plt.plot(datatmp[cm1_start_index::], cm1z[i][cm1_start_index::], color=cm1colors[i % len(cm1colors)], linewidth=1.5, label='CM1')
+                        plt.plot(datatmp[cm1_start_index::], cm1z[i][cm1_start_index::], color=cm1colors[i % len(cm1colors)], linewidth=cm1_linewidth, label='CM1')
                 else:
                     print(f"CM1 variable '{Var}' not recognized.")
 
@@ -1348,7 +1350,7 @@ for xx in range(arr_ncases):
                 did_we_find_cm1 = True
                 # Plot data for each file
                 for i, datatmp in enumerate(cm1_data_dict[Var]):
-                    plt.plot(datatmp[cm1_start_index::], cm1z[i][cm1_start_index::], color=cm1colors[i % len(cm1colors)], linewidth=1.5, label='CM1')
+                    plt.plot(datatmp[cm1_start_index::], cm1z[i][cm1_start_index::], color=cm1colors[i % len(cm1colors)], linewidth=cm1_linewidth, label='CM1')
             else:
                 print(f"CM1 Variable '{Var}' not recognized.")
                 did_we_find_cm1 = False
@@ -1895,7 +1897,7 @@ for vari in range(2,5): # np.size(Vars)):
     fig = plt.figure(figsize=(6,3))
     ax = fig.add_subplot(1, 1, 1)
 
-    plt.plot(PlotTimes, HourlyMeansObs,  color = [0.0,0.0,0.0], linewidth=2.0, label = 'Observations')
+    plt.plot(PlotTimes, HourlyMeansObs,  color = [0.0,0.0,0.0], linewidth=2.5, label = 'Observations')
 
     for xstri in range(0,np.size(xStrs)):
         xStr = xStrs[xstri]
