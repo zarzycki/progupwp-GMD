@@ -560,8 +560,17 @@ print_break()
 plot_cm1=True
 if plot_cm1:
     cm1_start_index = 1    # what "level" do we start plotting at (0 means plot all)
-    cm1files = ['cm1-reference/avg.nc']
-    cm1colors = ['darkgrey']
+    # avg is obs
+    # avg1 is ERA5 + derived ug/vp/wprof (bad PBL, no smoothing) (purple)
+    # avg2 is ERA5 + analytic ug/vg/wprof from Graap and Zarzycki (pink)
+    # avg3 is ERA5 + derived ug/vp/wprof with smoothing in PBL (orange)
+    ## avg4 is ERA5 + derived ug/vp/wprof with smoothing in PBL + radiation (RRTMG) -- 12Z (green)
+    # avg5 is ERA5 + derived ug/vp/wprof with smoothing in PBL + radiation (RRTMG) -- 00Z (blue)
+    ## avg6 is ERA5 + derived ug/vp/wprof with smoothing in PBL + radiation (RRTMG) -- 00Z + testcase 99 and isnd 99 (red)
+    # avg7 is obs + derived ug/vp/wprof with smoothing in PBL + radiation (RRTMG) -- 00Z + testcase 99 and isnd 99 (red)
+    # avg8 is obs + derived ug/vp/wprof with smoothing in PBL + no radiation (tendencies as in BOMEX)
+    cm1files = ['cm1-reference/avg.nc','cm1-reference/avg1.nc','cm1-reference/avg2.nc','cm1-reference/avg3.nc','cm1-reference/avg8.nc','cm1-reference/avg5.nc','cm1-reference/avg7.nc']
+    cm1colors = ['darkgrey','purple','pink','orange','green','blue','red']
     cm1_linewidth = 1.7
 
     # Initialize arrays
